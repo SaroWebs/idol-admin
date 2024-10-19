@@ -62,4 +62,9 @@ class CoreImageController extends Controller
     {
         //
     }
+
+    public function get_banners() {
+        $banners = CoreImage::where('type','banner')->where('status', 1)->get();
+        return response()->json($banners);
+    }
 }

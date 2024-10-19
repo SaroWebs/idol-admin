@@ -2,11 +2,12 @@
 
 namespace Database\Seeders;
 
-// use Illuminate\Database\Console\Seeds\WithoutModelEvents;
-
-use App\Models\Pincodes;
 use App\Models\User;
+use App\Models\Product;
+use App\Models\Category;
+use App\Models\Pincodes;
 use App\Models\UserRole;
+use App\Models\CoreImage;
 use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
@@ -16,20 +17,32 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // $su = UserRole::create(['name' => 'superadmin', 'code' => 0]);
-        // $au = UserRole::create(['name' => 'admin', 'code' => 1]);
-        // $ma = UserRole::create(['name' => 'manager', 'code' => 2]);
-        // $pu = UserRole::create(['name' => 'product manager', 'code' => 3]);
-        // $dp = UserRole::create(['name' => 'delivery partner', 'code' => 4]);
+        // // Seed user roles
+        // $roles = [
+        //     ['name' => 'superadmin', 'code' => 0],
+        //     ['name' => 'admin', 'code' => 1],
+        //     ['name' => 'manager', 'code' => 2],
+        //     ['name' => 'product manager', 'code' => 3],
+        //     ['name' => 'delivery partner', 'code' => 4],
+        // ];
 
-        // // Create an user named Admin with admin role
-        // User::create([
-        //     'name' => 'Admin',
-        //     'email' => 'admin@idol.com',
-        //     'password' => bcrypt('admin123'),
-        //     'user_role_id' => $au->id,
-        // ]);
-        // Seed some pincodes
+        // foreach ($roles as $role) {
+        //     UserRole::updateOrCreate(['name' => $role['name']], $role);
+        // }
+
+        // // Create an Admin user
+        // $adminRole = UserRole::where('name', 'admin')->first();
+        // User::updateOrCreate(
+        //     ['email' => 'admin@idol.com'],
+        //     [
+        //         'name' => 'Admin',
+        //         'email' => 'admin@idol.com',
+        //         'password' => bcrypt('admin123'),
+        //         'user_role_id' => $adminRole->id,
+        //     ]
+        // );
+
+        // // Seed pincodes
         // $pincodes = [
         //     ['pin' => '781001', 'description' => 'Panbazar, Fancy Bazar', 'distance' => 4.5],
         //     ['pin' => '781003', 'description' => 'Silpukhuri', 'distance' => 3.5],
@@ -42,12 +55,45 @@ class DatabaseSeeder extends Seeder
         //     ['pin' => '781034', 'description' => 'Odalbakra', 'distance' => 9.0],
         //     ['pin' => '781036', 'description' => 'Hengrabari', 'distance' => 7.0],
         //     ['pin' => '781038', 'description' => 'Birkuchi', 'distance' => 12.0],
-        //     ['pin' => '781039', 'description' => 'Noonmati', 'distance' => 9.0]
+        //     ['pin' => '781039', 'description' => 'Noonmati', 'distance' => 9.0],
         // ];
 
         // foreach ($pincodes as $pincode) {
         //     $pincode['active'] = 1;
         //     Pincodes::updateOrCreate(['pin' => $pincode['pin']], $pincode);
         // }
+
+        // // Seed banners
+        // $banners = [
+        //     ['image_url' => '/images/banner/1.png', 'type' => 'banner', 'status' => 1],
+        //     ['image_url' => '/images/banner/2.png', 'type' => 'banner', 'status' => 1],
+        //     ['image_url' => '/images/banner/3.png', 'type' => 'banner', 'status' => 1],
+        // ];
+
+        // foreach ($banners as $bnr) {
+        //     CoreImage::updateOrCreate(['image_url' => $bnr['image_url']], $bnr);
+        // }
+
+        // // Seed categories
+        // $categories = [
+        //     ['name' => 'All', 'icon_path' => '/images/category-icon/all.png', 'status' => 1],
+        //     ['name' => 'Ayurvedic', 'icon_path' => '/images/category-icon/ayurvedic.png', 'status' => 1],
+        //     ['name' => 'Covid Essential', 'icon_path' => '/images/category-icon/covit-essential.jpg', 'status' => 1],
+        //     ['name' => 'Device & Surgical', 'icon_path' => '/images/category-icon/device-surgical.png', 'status' => 1],
+        //     ['name' => 'Diabetes', 'icon_path' => '/images/category-icon/diabetes.png', 'status' => 1],
+        //     ['name' => 'First Aid', 'icon_path' => '/images/category-icon/first-aid.png', 'status' => 1],
+        //     ['name' => 'Fitness', 'icon_path' => '/images/category-icon/fitness.png', 'status' => 1],
+        //     ['name' => 'Health', 'icon_path' => '/images/category-icon/health.png', 'status' => 1],
+        //     ['name' => 'Mom & Baby', 'icon_path' => '/images/category-icon/mom-baby.png', 'status' => 1],
+        //     ['name' => 'Personal Care', 'icon_path' => '/images/category-icon/personal-care.png', 'status' => 1],
+        //     ['name' => 'Prescription Drugs', 'icon_path' => '/images/category-icon/presc-drug.png', 'status' => 1],
+        //     ['name' => 'Vitamins', 'icon_path' => '/images/category-icon/vitamins.png', 'status' => 1],
+        // ];
+
+        // foreach ($categories as $cat) {
+        //     Category::updateOrCreate(['name' => $cat['name']], $cat);
+        // }
+
+        // Product::factory()->count(100)->create();
     }
 }

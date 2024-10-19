@@ -58,13 +58,16 @@ class CartItemController extends Controller
         }
     }
 
-    public function remove_item(Request $request, CartItem $cartItem)
+    public function remove_item(Request $request, Product $product)
     {
         $cx = new CustomerController();
         $customer = $cx->get_customer($request);
         if (!$customer instanceof Customer) {
             return $customer; // This will return the error response if authentication failed
         }
+        $cartItem = CartItem::where('product_id', $product->id)->first();
+
+
         if ($cartItem->customer_id !== $customer->id) {
             return response()->json(['message' => 'Unauthorized access to cart item'], 403);
         }

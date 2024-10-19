@@ -9,6 +9,7 @@ use App\Http\Controllers\Api\OTPController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\CartItemController;
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\CoreImageController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\PincodesController;
 use App\Http\Controllers\PrescriptionController;
@@ -29,6 +30,14 @@ use App\Http\Controllers\CustomerAddressController;
 // Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 //     return $request->user();
 // });
+
+Route::get('/categories/all', [CategoryController::class, 'get_items']);
+Route::get('/banners/all', [CoreImageController::class, 'get_banners']);
+Route::get('/pin/check', [PincodesController::class, 'pin_check']);
+Route::post('/sendotp', [CustomerLoginController::class, 'sendOTP']);
+Route::post('/verifyotp', [CustomerLoginController::class, 'verifyOTP']);
+
+Route::get('/products/top', [ProductController::class, 'top_items']);
 
 
 
@@ -53,7 +62,7 @@ Route::middleware('customer')->group(function () {
     Route::get('/authenticate', [CustomerController::class, 'authenticate']);
     Route::get('/cart', [CartItemController::class, 'get_items']);
     Route::get('/cart/add-item/{product}', [CartItemController::class, 'add_item']);
-    Route::get('/cart/remove-item/{cartItem}', [CartItemController::class, 'remove_item']);
+    Route::get('/cart/remove-item/{product}', [CartItemController::class, 'remove_item']);
     Route::post('/cart/update-item/{cartItem}', [CartItemController::class, 'update_item']);
     Route::get('/cart/clear', [CartItemController::class, 'clear_cart']);
     Route::get('/address/{address}/activate', [CustomerAddressController::class, 'activate']);
@@ -72,8 +81,3 @@ Route::middleware('customer')->group(function () {
     Route::get('/orders', [OrderController::class, 'get_orders']);
 });
 
-Route::get('/pin/check', [PincodesController::class, 'pin_check']);
-Route::post('/sendotp', [CustomerLoginController::class, 'sendOTP']);
-Route::post('/verifyotp', [CustomerLoginController::class, 'verifyOTP']);
-
-Route::get('/products/top', [ProductController::class, 'top_items']);

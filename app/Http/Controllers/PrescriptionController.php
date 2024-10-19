@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Order;
 use App\Models\Customer;
 use Illuminate\Support\Str;
 use App\Models\Prescription;
@@ -41,60 +42,95 @@ class PrescriptionController extends Controller
         if (!$customer instanceof Customer) {
             return $customer;
         }
-        // accepts multiple images at once
+
+        // Validate input
         $validatedData = $request->validate([
             'images' => 'required|array',
-            'images.*' => 'file',
+            'images.*' => 'file|mimes:jpeg,jpg,png|max:2048',
             'status' => 'required|in:pending,assigned,unassigned',
         ]);
+
+        $order_id = null;
 
         // Check for an existing pending or unassigned prescription
         if (in_array($validatedData['status'], ['pending', 'unassigned'])) {
             $existingPrescription = Prescription::where('customer_id', $customer->id)
                 ->where('status', $validatedData['status'])
                 ->first();
+
             if ($existingPrescription) {
-                // get prescriptions of same group_code if not null
-                $prescGroup = Prescription::where('group_code', $existingPrescription->group_code)->get();
-                // remove prescriptions
-                foreach ($prescGroup as $presc) {
-                    Storage::disk('public')->delete($presc->file_path);
-                    $presc->delete();
-                }
+                $this->delete_prescription_group($existingPrescription->group_code);
+            }
+        } elseif ($validatedData['status'] == 'assigned' && $request->order_code) {
+            $order = Order::where('order_code', $request->order_code)->first();
+
+            if (!$order) {
+                return response()->json(['message' => 'Order not found'], 404);
+            }
+
+            $order_id = $order->id;
+
+            // Check for existing assigned prescription
+            $assignedPrescription = Prescription::where('order_id', $order->id)->first();
+            if ($assignedPrescription) {
+                $this->delete_prescription_group($assignedPrescription->group_code);
             }
         }
 
         // Generate a unique group_code for the prescriptions
-        $groupCode = (string) Str::uuid();
+        $groupCode = (string) Str::uuid() ?? bin2hex(random_bytes(16));
 
         // Start a new database transaction
         DB::beginTransaction();
 
-        // Process each image
-        $prescriptions = [];
-        foreach ($validatedData['images'] as $index => $image) {
-            $imagePath = $image->store('prescriptions', 'public');
-            $prescription = Prescription::create([
-                'customer_id' => $customer->id,
-                'file_path' => $imagePath,
-                'status' => $validatedData['status'],
-                'group_code' => $groupCode,
-                'page' => $index + 1,
-            ]);
+        try {
+            // Process each image
+            $prescriptions = [];
+            foreach ($validatedData['images'] as $index => $image) {
+                // Store image
+                $imagePath = $image->store('prescriptions', 'public');
 
-            if (!$prescription) {
-                // Rollback the transaction if any item fails to upload
-                DB::rollBack();
-                return response()->json(['message' => 'Failed to upload prescription'], 400);
+                // Create prescription entry in the database
+                $prescription = Prescription::create([
+                    'customer_id' => $customer->id,
+                    'file_path' => $imagePath,
+                    'status' => $validatedData['status'],
+                    'group_code' => $groupCode,
+                    'order_id' => $order_id,
+                    'page' => $index + 1,
+                ]);
+
+                if (!$prescription) {
+                    // Rollback the transaction if any item fails to upload
+                    DB::rollBack();
+                    return response()->json(['message' => 'Failed to upload prescription'], 400);
+                }
+
+                $prescriptions[] = $prescription;
             }
-            $prescriptions[] = $prescription;
-        }
 
-        // Commit the transaction if all items are successfully uploaded
-        DB::commit();
+            // Commit the transaction if all items are successfully uploaded
+            DB::commit();
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json(['message' => 'Failed to upload prescription'], 500);
+        }
 
         return response()->json(['message' => 'Prescriptions uploaded successfully'], 201);
     }
+
+    /**
+     * Delete all prescriptions associated with the given group_code.
+     */
+    private function delete_prescription_group($group_code)
+    {
+        $prescGroup = Prescription::where('group_code', $group_code)->get();
+        foreach ($prescGroup as $presc) {
+            Storage::disk('public')->delete($presc->file_path);
+            $presc->delete();
+        }
+    }
+
 
     public function get_pending_item(Request $request)
     {

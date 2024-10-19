@@ -22,26 +22,28 @@ return new class extends Migration
             $table->text('d_details')->nullable();
             $table->text('sip_details')->nullable();
             $table->text('o_details')->nullable();
-        
+
             $table->decimal('price', 8, 2)->default(0.00);
             $table->decimal('discount', 8, 2)->default(0.00);
             $table->decimal('offer_price', 8, 2)->default(0.00);
-        
+
             $table->string('mfg_name')->nullable();
-        
+
             $table->integer('total_qty')->default(0);
             $table->integer('alert_qty')->default(5);
-            
+
             $table->foreignId('category_id')->nullable()->constrained('categories')->onDelete('set null');
             $table->foreignId('subcategory_id')->nullable()->constrained('subcategories')->onDelete('set null');
             $table->foreignId('tax_id')->nullable()->constrained('taxes')->onDelete('set null');
-        
+
             $table->boolean('prescription')->default(0);
             $table->unsignedTinyInteger('status')->default(0);
-        
+
+            $table->boolean('returnable')->default(0);
+            $table->integer('return_time')->default(1); //days
+            
             $table->timestamps();
         });
-        
     }
 
     /**

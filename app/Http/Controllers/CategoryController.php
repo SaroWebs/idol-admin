@@ -64,6 +64,10 @@ class CategoryController extends Controller
     }
 
     // api
+    public function get_items() {
+        $cats = Category::where('status',1)->get();
+        return response()->json($cats);
+    }
 
     public function getcategories(Request $request)
     {
