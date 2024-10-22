@@ -3,55 +3,67 @@
 namespace App\Http\Controllers;
 
 use App\Models\Product;
+use App\Models\Category;
 use Illuminate\Http\Request;
 
 class ProductController extends Controller
 {
-   
+
 
     public function getproducts(Request $request)
     {
+        // Validate query parameters with default values
         $perPage = $request->query('per_page', 20);
         $page = $request->query('page', 1);
         $orderBy = $request->query('order_by', 'name');
-        $orderDirection = $request->query('order_direction', 'asc');
-        
+        $orderDirection = strtolower($request->query('order_direction', 'asc'));
 
+        // List of valid columns for ordering
         $validColumns = ['id', 'name', 'price'];
         if (!in_array($orderBy, $validColumns)) {
-            $orderBy = 'id';
+            $orderBy = 'id';  // Default to 'id' if invalid column is provided
         }
 
-        $orderDirection = strtolower($orderDirection) === 'desc' ? 'desc' : 'asc';
+        // Ensure the order direction is either 'asc' or 'desc'
+        $orderDirection = $orderDirection === 'desc' ? 'desc' : 'asc';
 
+        // Start the product query
         $productsQuery = Product::with('images')->orderBy($orderBy, $orderDirection);
-        if($request->query('top')){
-            $productsQuery = $productsQuery->where('top','Y');
+
+        // Apply filters if present
+        if ($request->query('top')) {
+            $productsQuery->where('top', 'Y');
         }
 
-        if($request->query('feature')){
-            $productsQuery = $productsQuery->where('feat','Y');
+        if ($request->query('feature')) {
+            $productsQuery->where('feat', 'Y');
         }
 
-        if($request->query('category')){
-            $productsQuery = $productsQuery->where('category_id', $request->query('category'));
-        }
-        if($request->query('subcategory')){
-            $productsQuery = $productsQuery->where('subcategory_id', $request->query('subcategory'));
+        if ($categoryId = $request->query('category')) {
+            $productsQuery->where('category_id', $categoryId);
         }
 
+        if ($subcategoryId = $request->query('subcategory')) {
+            $productsQuery->where('subcategory_id', $subcategoryId);
+        }
         $products = $productsQuery->paginate($perPage, ['*'], 'page', $page);
 
-        return response()->json($products);
+        $productsArray = $products->toArray();
+
+        if ($categoryId) {
+            $category = Category::find($categoryId);
+            $productsArray['category'] = $category;
+        }
+
+        return response()->json($productsArray);
     }
 
 
-    public function getitem($pid){
-        $item = Product::with('images')->find($pid);
-        if ($item) {
-            return response()->json($item);
-        }
-        return response()->json(['message'=>"Item not found"], 404);
+
+    public function getitem(Product $product)
+    {
+        $product->load('images');
+        return response()->json($product);
     }
 
     public function search_item(Request $request)
@@ -66,14 +78,15 @@ class ProductController extends Controller
                 ->with('images')
                 ->take(50)
                 ->get();
-    
+
             return response()->json($products, 200);
-        }else{
+        } else {
             return response()->json(null, 400);
         }
     }
 
-    public function top_items() {
+    public function top_items()
+    {
         $tp = Product::with(['images'])
             ->where('top', 'Y')
             ->take(6)

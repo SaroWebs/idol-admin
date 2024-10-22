@@ -47,7 +47,7 @@ Route::post('/user/verify', [OTPController::class, 'verify_user']);
 
 // products
 Route::get('/products', [ProductController::class, 'getproducts']);
-Route::get('/product/{pid}', [ProductController::class, 'getitem']);
+Route::get('/product/{product}', [ProductController::class, 'getitem']);
 
 // categories
 Route::get('/categories', [CategoryController::class, 'getcategories']);
