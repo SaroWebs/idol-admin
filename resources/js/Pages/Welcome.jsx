@@ -1,6 +1,16 @@
-import { Link, Head } from '@inertiajs/react';
+import {  Head, router } from '@inertiajs/react';
+import { useEffect } from 'react';
 
 export default function Welcome({ auth, appVersion }) {
+    
+    useEffect(() => {
+      if(auth.user){
+        router.visit('/dashboard');
+      }else{
+        router.visit('/login');
+      }
+    }, [auth]);
+    
     return (
         <>
             <Head title="Welcome" />

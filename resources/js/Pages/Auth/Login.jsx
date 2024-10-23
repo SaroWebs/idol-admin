@@ -29,7 +29,9 @@ export default function Login({ status, canResetPassword }) {
     return (
         <GuestLayout>
             <Head title="Log in" />
-
+            <div className="flex justify-center items-center mb-4">
+                <h2 className="text-3xl font-bold text-blue-500">Sign In</h2>
+            </div>
             {status && <div className="mb-4 font-medium text-sm text-green-600">{status}</div>}
 
             <form onSubmit={submit}>
@@ -92,6 +94,10 @@ export default function Login({ status, canResetPassword }) {
                     </PrimaryButton>
                 </div>
             </form>
+            
+            <div className="flex justify-center items-center mt-8 py-3 bg-slate-300">
+                <h3>Designed & Maintained by <a target='_blank' href="https://www.vasptechnologies.com" className="font-bold cursor-pointer text-orange-600">VASP Technologies</a> </h3>
+            </div>
         </GuestLayout>
     );
 }

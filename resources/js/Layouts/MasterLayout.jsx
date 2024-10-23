@@ -1,9 +1,45 @@
-import React from 'react'
+import { AppShell } from '@mantine/core';
+import { useDisclosure } from '@mantine/hooks';
+import { useEffect } from 'react';
+import '@mantine/core/styles.css';
+import TopHeader from '@/Components/Navigation/TopHeader';
+import Sidebar from '@/Components/Navigation/Sidebar';
+import Footer from '@/Components/Navigation/Footer';
 
-const MasterLayout = (props) => {
-  return (
-    <div>{props.children}</div>
-  )
+export default function MasterLayout(props) {
+	const { children } = props;
+
+	// Initialize sidebar state from localStorage if it exists, default to true for desktop
+	const initialSidebarState = typeof window !== 'undefined' 
+		? JSON.parse(localStorage.getItem('sidebarOpened')) ?? true 
+		: true;
+
+	const [sidebarOpened, { toggle: toggleSidebar }] = useDisclosure(initialSidebarState);
+
+	// Update localStorage whenever the sidebar state changes
+	useEffect(() => {
+		localStorage.setItem('sidebarOpened', JSON.stringify(sidebarOpened));
+	}, [sidebarOpened]);
+
+	return (
+		<AppShell
+			padding="md"
+			header={{ height: 60 }}
+			footer={{ height: 30 }}
+			navbar={{
+				width: 300,
+				breakpoint: 'sm',
+				collapsed: { mobile: !sidebarOpened, desktop: !sidebarOpened },
+			}}
+		>
+			<TopHeader sidebarOpened={sidebarOpened} toggleSidebar={toggleSidebar} {...props} />
+			<Sidebar {...props} />
+			<AppShell.Main>
+				<div className="main">
+					{children}
+				</div>
+			</AppShell.Main>
+			<Footer sidebarOpened={sidebarOpened} />
+		</AppShell>
+	);
 }
-
-export default MasterLayout
