@@ -64,30 +64,30 @@ class CategoryController extends Controller
     }
 
     // api
-    public function get_items() {
-        $cats = Category::where('status',1)->get();
+    public function get_all() {
+        $cats = Category::get();    
         return response()->json($cats);
     }
+    
+    public function get_items() {
+        $user = Auth::user(); 
+        $query = Category::query();
+        
+        if(!$user) {
+            $query->where('status', 1);
+        }
+
+        $cats = $query->get();    
+        return response()->json($cats);
+    }
+    
 
     public function getcategories(Request $request)
     {
         $perPage = $request->query('per_page', 20);
         $page = $request->query('page', 1);
-        $orderBy = $request->query('order_by', 'name');
-        $orderDirection = $request->query('order_direction', 'asc');
-
-        $validColumns = ['id', 'name'];
-        if (!in_array($orderBy, $validColumns)) {
-            $orderBy = 'id';
-        }
-
-        $orderDirection = strtolower($orderDirection) === 'desc' ? 'desc' : 'asc';
-
-        $thequery = Category::orderBy($orderBy, $orderDirection);
-
-        $theitems = $thequery->paginate($perPage, ['*'], 'page', $page);
-
-        return response()->json($theitems);
+        $categories = Category::paginate($perPage, ['*'], 'page', $page);
+        return response()->json($categories);
     }
 
 

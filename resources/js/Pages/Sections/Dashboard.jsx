@@ -1,36 +1,20 @@
 import { Head } from '@inertiajs/react';
 import MasterLayout from '@/Layouts/MasterLayout'
-import { Anchor, Breadcrumbs } from '@mantine/core';
+import BreadcrumbsComponent from '@/Components/BreadcrumbComponent';
 
 export default function Dashboard(props) {
-
-
-    // breadcrumb
-    const items = [
-        { title: 'Home', href: '/' },
-        { title: 'Dashboard', href: '#' },
-    ].map((item, index) => (
-        <Anchor
-            href={item.href === '#' ? undefined : item.href}
-            key={index}
-            style={{
-                color: item.href === '#' ? '#9ca3af' : 'inherit',
-                pointerEvents: item.href === '#' ? 'none' : 'auto',
-                textDecoration: item.href === '#' ? 'none' : 'underline',
-            }}
-        >
-            {item.title}
-        </Anchor>
-    ));
 
     return (
         <MasterLayout {...props}>
             <Head title="Dashboard" />
 
             <div className="px-6 py-4">
-                <Breadcrumbs separator="•" mt="xs">
-                    {items}
-                </Breadcrumbs>
+                <BreadcrumbsComponent
+                    items={[
+                        { title: 'Home', href: '/' },
+                        { title: 'Dashboard', href: '#' },
+                    ]}
+                />
 
                 <h1 className="text-2xl font-bold my-4">Admin Dashboard</h1>
 

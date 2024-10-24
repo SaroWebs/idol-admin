@@ -39,9 +39,9 @@ class ProductFactory extends Factory
             'alert_qty' => $this->faker->numberBetween(1, 10),
             'category_id' => Category::inRandomOrder()->first()->id,  // Assign a random category
             'prescription' => $this->faker->boolean(),
-            'status' => $this->faker->numberBetween(0, 1),
+            'status' => 1,
             'returnable' => $this->faker->boolean(),
-            'return_time' => $this->faker->numberBetween(1, 30),
+            'return_time' => $this->faker->numberBetween(1, 120) * 6,
         ];
     }
 }
