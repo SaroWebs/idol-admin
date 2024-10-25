@@ -21,6 +21,7 @@ use App\Http\Controllers\CategoryController;
 
 Route::controller(HomeController::class)->group(function(){
     Route::get('/', 'index');
+    Route::get('/test', 'test');
 });
 
 Route::middleware('auth')->group(function () {

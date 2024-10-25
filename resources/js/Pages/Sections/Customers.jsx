@@ -1,9 +1,40 @@
 import BreadcrumbsComponent from '@/Components/BreadcrumbComponent'
 import MasterLayout from '@/Layouts/MasterLayout'
 import { Head } from '@inertiajs/react'
+import { Button, Table } from '@mantine/core'
+import { CircleIcon } from 'lucide-react'
 import React from 'react'
 
 const Customers = (props) => {
+
+  const elements = [
+    { id:1, name: "hgfhf", phone:'243254' ,email: 'abc@gmail.cim', image_url:'' },
+    { id:2, name: "hhhhhhh", phone:'09808', email: 'abc@gmail.cim', image_url:'' },
+    { id:3, name: "hhhhhhh", phone:'09808', email: 'abc@gmail.cim', image_url:'' },
+    { id:4, name: "hhhhhhh", phone:'09808', email: 'abc@gmail.cim', image_url:'' },
+  ];
+
+  const rows = elements.map((element) => (
+    <Table.Tr key={element.id}>
+      <Table.Td>
+        {element.image_url ? (
+          <img className='max-w-[100px]' src={"/storage"+element.image_url} alt={element.name} />
+        ):(
+          <img className='max-w-[100px]' src={"/assets/images/no-image.png"} alt={element.name} />
+        )}
+      </Table.Td>
+      <Table.Td>{element.name}</Table.Td>
+      <Table.Td>{element.email}</Table.Td>
+      <Table.Td>{element.phone}</Table.Td>
+      <Table.Td>
+        <div className="flex gap-2">
+          <Button>Edit</Button>
+          <Button>Remove</Button>
+        </div>
+      </Table.Td>
+    </Table.Tr>
+  ));
+
   return (
     <MasterLayout {...props}>
       <Head title="Customers" />
@@ -11,19 +42,32 @@ const Customers = (props) => {
       <div className="p-6">
         <BreadcrumbsComponent
           items={[
-            { title: 'Home', href: '/' },
+            { title: 'Dashboard', href: '/dashboard' },
             { title: 'Customers', href: '#' },
+            { title: 'Regular Customers', href: '#' },
           ]}
         />
-        <h1 className="text-2xl font-bold my-4">Customers</h1>
-        <div className="content p-4 border rounded-md shadow-sm">
-          <p>
-            Lorem ipsum dolor sit amet consectetur adipisicing elit. Accusantium, sint voluptate et vel amet laboriosam ipsa non numquam repellat ullam labore facilis perspiciatis qui possimus odit cumque magnam autem voluptatem?
-            Quidem corporis provident vitae nulla, praesentium rem neque laborum suscipit, iusto sapiente similique maiores reprehenderit ullam iure minima deleniti doloremque error aspernatur facere. Ullam culpa non soluta nihil natus fugit.
-            Laborum autem quibusdam nulla nobis in officia porro enim quas. Est possimus veniam accusantium numquam odio sapiente necessitatibus, facere vero minima doloremque voluptas, earum praesentium neque totam quis repudiandae? Quo!
-            At quo repellat enim possimus debitis est pariatur eos, explicabo aspernatur similique sapiente, natus nesciunt provident incidunt quis voluptatum temporibus beatae rerum consequatur quasi cum unde accusamus. Enim, assumenda excepturi?
-            Suscipit voluptatibus unde perspiciatis, nostrum illum ipsa quisquam eius modi nam excepturi inventore atque temporibus. Rerum dolorum voluptatem delectus quo at? Minima accusantium debitis fugit cum, vel soluta quos iusto.
-          </p>
+        <div className="mt-8">
+          <div className="flex justify-between items-center">
+            <h1 className="text-3xl font-bold">List of Customers</h1>
+            <p><Button>Add Customer</Button></p>
+          </div>
+
+          <hr className='my-6' />
+          <div className="content">
+            <Table>
+              <Table.Thead>
+                <Table.Tr>
+                  <Table.Th>Image</Table.Th>
+                  <Table.Th>Name</Table.Th>
+                  <Table.Th>Email</Table.Th>
+                  <Table.Th>ph no</Table.Th>
+                  <Table.Th>Actions</Table.Th>
+                </Table.Tr>
+              </Table.Thead>
+              <Table.Tbody>{rows}</Table.Tbody>
+            </Table>
+          </div>
         </div>
       </div>
     </MasterLayout>
