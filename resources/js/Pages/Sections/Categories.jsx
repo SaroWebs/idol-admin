@@ -1,6 +1,10 @@
 import BreadcrumbsComponent from '@/Components/BreadcrumbComponent'
+import AddCategory from '@/Components/Categories/AddCategory'
+import EditCategory from '@/Components/Categories/EditCategory'
+import RemoveCategory from '@/Components/Categories/RemoveCategory'
 import MasterLayout from '@/Layouts/MasterLayout'
 import { Head } from '@inertiajs/react'
+import { Button } from '@mantine/core'
 import axios from 'axios'
 import { MantineReactTable } from 'mantine-react-table'
 import 'mantine-react-table/styles.css';
@@ -11,6 +15,7 @@ const Categories = (props) => {
 
 	const [categories, setCategories] = useState([]);
 	const [isLoading, setIsLoading] = useState(false);
+	const [addFormOpen, setAddFormOpen] = useState(false);
 
 	const getCategories = () => {
 		setIsLoading(true);
@@ -31,24 +36,6 @@ const Categories = (props) => {
 		getCategories();
 	}, []);
 
-	// Function to handle edit action
-	const handleEdit = (id) => {
-		console.log(`Editing category with ID: ${id}`);
-	};
-
-	// Function to handle delete action
-	const handleDelete = (id) => {
-		if (window.confirm('Are you sure you want to delete this category?')) {
-			axios.delete(`/data/categories/${id}`)
-				.then(res => {
-					console.log(`Category ${id} deleted`);
-					getCategories();
-				})
-				.catch(err => {
-					console.error('Error deleting category:', err.message);
-				});
-		}
-	};
 
 	const normalizeData = () => {
 		if (!categories) return [];
@@ -59,18 +46,8 @@ const Categories = (props) => {
 			status: category.status == 1 ? 'Active' : 'Inactive',
 			actions: (
 				<div>
-					<button
-						className="text-blue-500 hover:underline mr-2"
-						onClick={() => handleEdit(category.id)}
-					>
-						Edit
-					</button>
-					<button
-						className="text-red-500 hover:underline"
-						onClick={() => handleDelete(category.id)}
-					>
-						Delete
-					</button>
+					<EditCategory category={category} reload={getCategories} />
+					<RemoveCategory category={category} reload={getCategories} />
 				</div>
 			)
 		}));
@@ -95,15 +72,22 @@ const Categories = (props) => {
 						{ title: 'Categories', href: '#' },
 					]}
 				/>
-				<h1 className="text-2xl font-bold my-4">Categories</h1>
-				<div className="content p-4 border rounded-md shadow-sm">
-					{categories && (
-						<MantineReactTable
-							columns={columns}
-							data={normalizeData()}
-						/>
-					)}
-				</div>
+				{addFormOpen ? <AddCategory /> :
+					<div className="content">
+						<div className="headings flex justify-between">
+							<h1 className="text-2xl font-bold my-4">Categories</h1>
+							<div className="actions flex gap-1">
+								<Button onClick={() => setAddFormOpen(true)}>New Category</Button>
+							</div>
+						</div>
+						{categories && (
+							<MantineReactTable
+								columns={columns}
+								data={normalizeData()}
+							/>
+						)}
+					</div>
+				}
 			</div>
 		</MasterLayout>
 	)
