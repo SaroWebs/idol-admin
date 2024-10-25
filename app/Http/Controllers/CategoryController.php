@@ -27,9 +27,38 @@ class CategoryController extends Controller
      * Store a newly created resource in storage.
      */
     public function store(Request $request)
-    {
-        //
+{
+    $request->validate([
+        'name' => 'required|string|max:255',
+        'description' => 'nullable|string',
+        'icon' => 'nullable|mimes:jpeg,png,jpg,gif,svg|max:2048',
+        'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+        'status' => 'required|boolean'
+    ]);
+
+    $data = [
+        'name' => $request->input('name'),
+        'description' => $request->input('description'),
+        'status' => $request->input('status')
+    ];
+
+    // Store icon file if uploaded
+    if ($request->hasFile('icon')) {
+        $iconPath = $request->file('icon')->store('images/category-icon', 'public');
+        $data['icon_path'] = $iconPath;
     }
+
+    // Store image file if uploaded
+    if ($request->hasFile('image')) {
+        $imagePath = $request->file('image')->store('images/category-image', 'public');
+        $data['image_path'] = $imagePath;
+    }
+
+    // Create the category
+    $category = Category::create($data);
+
+    return response()->json(['message' => 'Category created successfully', 'category' => $category], 201);
+}
 
     /**
      * Display the specified resource.

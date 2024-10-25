@@ -45,6 +45,7 @@ Route::middleware('auth')->group(function () {
 
     Route::controller(CategoryController::class)->group(function () {
         Route::get('/data/categories', 'get_all');
+        Route::post('/categories/new', 'store');
         Route::delete('/data/categories/{category}', 'destroy');
     });
 });

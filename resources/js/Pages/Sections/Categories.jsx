@@ -72,7 +72,7 @@ const Categories = (props) => {
 						{ title: 'Categories', href: '#' },
 					]}
 				/>
-				{addFormOpen ? <AddCategory /> :
+				{addFormOpen ? <AddCategory reload={getCategories}/> :
 					<div className="content">
 						<div className="headings flex justify-between">
 							<h1 className="text-2xl font-bold my-4">Categories</h1>
