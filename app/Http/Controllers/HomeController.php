@@ -15,6 +15,11 @@ class HomeController extends Controller
         ]);
     }
 
+    public function test()
+    {
+        return Inertia::render('TestPage');
+    }
+
     public function dashboard()
     {
         return Inertia::render('Sections/Dashboard');
