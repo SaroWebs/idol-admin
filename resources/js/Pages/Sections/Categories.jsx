@@ -28,6 +28,7 @@ const Categories = (props) => {
 			})
 			.finally(() => {
 				setIsLoading(false);
+				setAddFormOpen(false);
 				console.log("Request completed");
 			});
 	};
@@ -72,12 +73,12 @@ const Categories = (props) => {
 						{ title: 'Categories', href: '#' },
 					]}
 				/>
-				{addFormOpen ? <AddCategory reload={getCategories}/> :
+				{addFormOpen ? <AddCategory reload={getCategories} setAddFormOpen={setAddFormOpen}/> :
 					<div className="content">
 						<div className="headings flex justify-between">
 							<h1 className="text-2xl font-bold my-4">Categories</h1>
 							<div className="actions flex gap-1">
-								<Button onClick={() => setAddFormOpen(true)}>New Category</Button>
+								<Button color={'orange'} onClick={() => setAddFormOpen(true)}>New Category</Button>
 							</div>
 						</div>
 						{categories && (
