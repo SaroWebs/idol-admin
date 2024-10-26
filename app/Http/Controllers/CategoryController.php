@@ -29,38 +29,38 @@ class CategoryController extends Controller
      * Store a newly created resource in storage.
      */
     public function store(Request $request)
-{
-    $request->validate([
-        'name' => 'required|string|max:255',
-        'description' => 'nullable|string',
-        'icon' => 'nullable|mimes:jpeg,png,jpg,gif,svg|max:2048',
-        'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-        'status' => 'required|boolean'
-    ]);
+    {
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'description' => 'nullable|string',
+            'icon' => 'nullable|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'status' => 'required|boolean'
+        ]);
 
-    $data = [
-        'name' => $request->input('name'),
-        'description' => $request->input('description'),
-        'status' => $request->input('status')
-    ];
+        $data = [
+            'name' => $request->input('name'),
+            'description' => $request->input('description'),
+            'status' => $request->input('status')
+        ];
 
-    // Store icon file if uploaded
-    if ($request->hasFile('icon')) {
-        $iconPath = $request->file('icon')->store('images/category-icon', 'public');
-        $data['icon_path'] = $iconPath;
+        // Store icon file if uploaded
+        if ($request->hasFile('icon')) {
+            $iconPath = $request->file('icon')->store('images/category-icon', 'public');
+            $data['icon_path'] = $iconPath;
+        }
+
+        // Store image file if uploaded
+        if ($request->hasFile('image')) {
+            $imagePath = $request->file('image')->store('images/category-image', 'public');
+            $data['image_path'] = $imagePath;
+        }
+
+        // Create the category
+        $category = Category::create($data);
+
+        return response()->json(['message' => 'Category created successfully', 'category' => $category], 201);
     }
-
-    // Store image file if uploaded
-    if ($request->hasFile('image')) {
-        $imagePath = $request->file('image')->store('images/category-image', 'public');
-        $data['image_path'] = $imagePath;
-    }
-
-    // Create the category
-    $category = Category::create($data);
-
-    return response()->json(['message' => 'Category created successfully', 'category' => $category], 201);
-}
 
     /**
      * Display the specified resource.
@@ -82,47 +82,47 @@ class CategoryController extends Controller
      * Update the specified resource in storage.
      */
     public function update(Request $request, Category $category)
-{
-    // Validate the incoming request data
-    $validatedData = $request->validate([
-        'name' => 'nullable|string|max:255',
-        'description' => 'nullable|string',
-        'icon' => 'nullable|image|mimes:jpeg,png,jpg,svg|max:2048',
-        'image' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
-    ]);
+    {
+        // Validate the incoming request data
+        $validatedData = $request->validate([
+            'name' => 'nullable|string|max:255',
+            'description' => 'nullable|string',
+            'icon' => 'nullable|image|mimes:jpeg,png,jpg,svg|max:2048',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+        ]);
 
-    // Update the category's basic information
-    $category->name = $validatedData['name'] ?? $request->name;
-    $category->description = $validatedData['description'] ?? $category->description;
+        // Update the category's basic information
+        $category->name = $validatedData['name'] ?? $category->name;
+        $category->description = $validatedData['description'] ?? $category->description;
 
-    // Handle the icon upload
-    if ($request->hasFile('icon')) {
-        if ($category->icon_path) {
-            Storage::disk('public')->delete($category->icon_path);
+        // Handle the icon upload
+        if ($request->hasFile('icon')) {
+            if ($category->icon_path) {
+                Storage::disk('public')->delete($category->icon_path);
+            }
+
+            $iconPath = $request->file('icon')->store('images/category-icon', 'public');
+            $category->icon_path = $iconPath;
         }
 
-        $iconPath = $request->file('icon')->store('images/category-icon', 'public');
-        $category->icon_path = $iconPath;
-    }
-
-    // Handle the image upload
-    if ($request->hasFile('image')) {
-        if ($category->image_path) {
-            Storage::disk('public')->delete($category->image_path);
+        // Handle the image upload
+        if ($request->hasFile('image')) {
+            if ($category->image_path) {
+                Storage::disk('public')->delete($category->image_path);
+            }
+            $imagePath = $request->file('image')->store('images/category-image', 'public');
+            $category->image_path = $imagePath;
         }
-        $imagePath = $request->file('image')->store('images/category-image', 'public');
-        $category->image_path = $imagePath;
+
+        // Save the updated category
+        $category->save();
+
+        // Optionally, return a response
+        return response()->json([
+            'message' => 'Category updated successfully',
+            'category' => $category,
+        ], 200);
     }
-
-    // Save the updated category
-    $category->save();
-
-    // Optionally, return a response
-    return response()->json([
-        'message' => 'Category updated successfully',
-        'category' => $category,
-    ], 200);
-}
     /**
      * Remove the specified resource from storage.
      */
@@ -132,23 +132,25 @@ class CategoryController extends Controller
     }
 
     // api
-    public function get_all() {
-        $cats = Category::get();    
+    public function get_all()
+    {
+        $cats = Category::get();
         return response()->json($cats);
     }
-    
-    public function get_items() {
-        $user = Auth::user(); 
+
+    public function get_items()
+    {
+        $user = Auth::user();
         $query = Category::query();
-        
-        if(!$user) {
+
+        if (!$user) {
             $query->where('status', 1);
         }
 
-        $cats = $query->get();    
+        $cats = $query->get();
         return response()->json($cats);
     }
-    
+
 
     public function getcategories(Request $request)
     {
@@ -161,7 +163,7 @@ class CategoryController extends Controller
 
     public function getcategory($id)
     {
-        $cat = Category::with('subcategories')->where('id',$id)->first();
+        $cat = Category::with('subcategories')->where('id', $id)->first();
         return response()->json($cat);
     }
 }
