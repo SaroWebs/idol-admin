@@ -4,6 +4,36 @@ import { Head } from '@inertiajs/react'
 import React from 'react'
 
 const Trips = (props) => {
+    const elements = [
+        { id: 1, customer_name: "hgfhf", customer_address: "pune", phone: '243254', email: 'abc@gmail.cim', payment_mode: "cash", order_no: "ORD2452345" },
+        { id: 2, customer_name: "hhhhhhh", customer_address: "Delhi", phone: '09808', email: 'abc@gmail.cim', payment_mode: "cash", order_no: 'ORD080988' },
+        { id: 3, customer_name: "hhhhhhh", customer_address: "kolkata", phone: '09808', email: 'abc@gmail.cim', payment_mode: "cash", order_no: '' },
+        { id: 4, customer_name: "hhhhhhh", customer_address: "pune", phone: '09808', email: 'abc@gmail.cim', payment_mode: "cash", order_no: '' },
+      ];
+
+      const rows = elements.map((element) => (
+        <Table.Tr key={element.id}>
+          <Table.Td>{element.order_no}</Table.Td>
+    
+          <Table.Td>{element.name}</Table.Td>
+          <Table.Td>{element.price}</Table.Td>
+          <Table.Td>{element.MRP}</Table.Td>
+          <Table.Td>{element.email}</Table.Td>
+          <Table.Td>{element.Stock}</Table.Td>
+          <Table.Td>{element.Availability}</Table.Td>
+          <Table.Td>
+            <div className="flex gap-2">
+              <ActionIcon variant="filled" color='cyan' aria-label="View">
+                <EyeIcon className='w-4' />
+              </ActionIcon>
+              <ActionIcon variant="filled" color='gray' aria-label="Edit">
+                <PencilIcon className='w-4' />
+              </ActionIcon>
+            </div>
+          </Table.Td>
+        </Table.Tr>
+      ));
+
     return (
         <MasterLayout {...props}>
             <Head title="Trips" />
@@ -15,17 +45,33 @@ const Trips = (props) => {
                         { title: 'Trips', href: '#' },
                     ]}
                 />
-                <h1 className="text-2xl font-bold my-4">Trips</h1>
-                <div className="content p-4 border rounded-md shadow-sm">
-                    <p>
-                        Lorem ipsum dolor sit amet consectetur adipisicing elit. Accusantium, sint voluptate et vel amet laboriosam ipsa non numquam repellat ullam labore facilis perspiciatis qui possimus odit cumque magnam autem voluptatem?
-                        Quidem corporis provident vitae nulla, praesentium rem neque laborum suscipit, iusto sapiente similique maiores reprehenderit ullam iure minima deleniti doloremque error aspernatur facere. Ullam culpa non soluta nihil natus fugit.
-                        Laborum autem quibusdam nulla nobis in officia porro enim quas. Est possimus veniam accusantium numquam odio sapiente necessitatibus, facere vero minima doloremque voluptas, earum praesentium neque totam quis repudiandae? Quo!
-                        At quo repellat enim possimus debitis est pariatur eos, explicabo aspernatur similique sapiente, natus nesciunt provident incidunt quis voluptatum temporibus beatae rerum consequatur quasi cum unde accusamus. Enim, assumenda excepturi?
-                        Suscipit voluptatibus unde perspiciatis, nostrum illum ipsa quisquam eius modi nam excepturi inventore atque temporibus. Rerum dolorum voluptatem delectus quo at? Minima accusantium debitis fugit cum, vel soluta quos iusto.
-                    </p>
-                </div>
-            </div>
+        <div className="mt-8">
+          <div className="flex justify-between items-center">
+            <h1 className="text-3xl font-bold">List of Medicines</h1>
+            <p><Button>Create Medicine</Button></p>
+          </div>
+
+          <hr className='my-6' />
+          <div className="content">
+            <Table>
+              <Table.Thead>
+                <Table.Tr>
+
+                  <Table.Th>Actions</Table.Th>
+                  <Table.Th>Product ID</Table.Th>
+                  <Table.Th>Offer price</Table.Th>
+                  <Table.Th>Name</Table.Th>
+                  <Table.Th>Email</Table.Th>
+                  <Table.Th>MRP</Table.Th>
+                  <Table.Th>Stock</Table.Th>
+                  <Table.Th>Availability</Table.Th>
+                </Table.Tr>
+              </Table.Thead>
+              <Table.Tbody>{rows}</Table.Tbody>
+            </Table>
+          </div>
+        </div>
+      </div>
         </MasterLayout>
     )
 }
