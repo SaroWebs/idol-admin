@@ -1,7 +1,8 @@
-import { useDisclosure } from '@mantine/hooks'
+import { useDisclosure } from '@mantine/hooks';
 import { Modal, FileInput, InputLabel, TextInput, Button } from '@mantine/core';
 import React, { useState, useEffect } from 'react';
 import { XIcon } from 'lucide-react';
+import axios from 'axios';
 
 const EditCategory = ({ category, reload }) => {
     const [opened, { open, close }] = useDisclosure(false);
@@ -13,13 +14,13 @@ const EditCategory = ({ category, reload }) => {
         image: null,
         status: 1,
     });
-    useEffect(() => {
 
+    useEffect(() => {
         if (category) {
             setFormInfo({
                 name: category.name,
                 description: category.description,
-                icon: category.icon_path ? { file: null, url: category.icon_path } : null, 
+                icon: category.icon_path ? { file: null, url: category.icon_path } : null,
                 image: category.image_path ? { file: null, url: category.image_path } : null,
                 status: category.status,
             });
@@ -28,43 +29,46 @@ const EditCategory = ({ category, reload }) => {
 
     const handleFileChange = (file, type) => {
         if (file) {
+            if (formInfo[type]?.url) URL.revokeObjectURL(formInfo[type].url); // Revoke old URL
             const fileUrl = URL.createObjectURL(file);
             setFormInfo((prev) => ({ ...prev, [type]: { file, url: fileUrl } }));
         }
     };
+
     const handleRemoveFile = (type) => {
+        if (formInfo[type]?.url) URL.revokeObjectURL(formInfo[type].url); // Revoke URL
         setFormInfo((prev) => ({ ...prev, [type]: null }));
     };
 
+   
     const handleSubmit = (e) => {
         e.preventDefault();
+        
         const fd = new FormData();
         fd.append('name', formInfo.name);
         fd.append('description', formInfo.description);
-        fd.append('status', formInfo.status);
-
+        fd.append('status', formInfo.status); // Ensure status is included
+    
         if (formInfo.icon) {
             fd.append('icon', formInfo.icon.file);
         }
-
+    
         if (formInfo.image) {
             fd.append('image', formInfo.image.file);
         }
-        console.log(formInfo);
-        console.log(fd);
-        // axios.put(`/categories/${category.id}`, fd)
-        //     .then(res => {
-        //         if (reload) {
-        //             reload();
-        //             close();
-        //         } else {
-        //             window.location.reload();
-        //         }
-        //     })
-
-        //     .catch(err => {
-        //         console.error('Error updating category:', err.message);
-        //     });
+    
+        axios.put(`/categories/${category.id}`, fd, {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+            },
+        })
+        .then(res => {
+            console.log(res.data);
+            
+        })
+        .catch(err => {
+            console.error('Error updating category:', err.message);
+        });
     };
 
     return (
@@ -101,7 +105,7 @@ const EditCategory = ({ category, reload }) => {
                                         {formInfo.icon.file ?
                                             <img src={formInfo.icon.url} alt="Icon Preview" className="object-fill h-28" />
                                             :
-                                            <img src={' storage/' + formInfo.icon.url} alt="Icon Preview" className="object-fill h-28" />
+                                            <img src={`storage/${formInfo.icon.url}`} alt="Icon Preview" className="object-fill h-28" />
                                         }
                                         <div onClick={() => handleRemoveFile('icon')} className="absolute cursor-pointer top-1 right-1 bg-red-500 text-white rounded-full p-1">
                                             <XIcon className='w-8' />
@@ -114,7 +118,6 @@ const EditCategory = ({ category, reload }) => {
                                         <span className="text-slate-600 text-xs">(jpg, png, svg)</span>
                                     </div>
                                 )}
-
                                 <FileInput
                                     id="icon-upload"
                                     accept="image/*"
@@ -125,15 +128,14 @@ const EditCategory = ({ category, reload }) => {
                         </div>
 
                         {/* Image Upload */}
-
                         <div className="w-full">
-                            <InputLabel htmlFor="image-upload" className="w-full relative border-2 border-dashed border-gray-300 rounded-md flex items-center justify-center h -32 cursor-pointer">
+                            <InputLabel htmlFor="image-upload" className="w-full relative border-2 border-dashed border-gray-300 rounded-md flex items-center justify-center h-32 cursor-pointer">
                                 {formInfo.image ? (
                                     <div className="relative">
                                         {formInfo.image.file ?
                                             <img src={formInfo.image.url} alt="Image Preview" className="object-fill h-28" />
                                             :
-                                            <img src={'storage/' + formInfo.image.url} alt="Image Preview" className="object-fill h-28" />
+                                            <img src={`storage/${formInfo.image.url}`} alt="Image Preview" className="object-fill h-28" />
                                         }
                                         <div onClick={() => handleRemoveFile('image')} className="absolute cursor-pointer top-1 right-1 bg-red-500 text-white rounded-full p-1">
                                             <XIcon className='w-8' />
@@ -146,7 +148,6 @@ const EditCategory = ({ category, reload }) => {
                                         <span className="text-slate-600 text-xs">(jpg, png)</span>
                                     </div>
                                 )}
-
                                 <FileInput
                                     id="image-upload"
                                     accept="image/*"
@@ -163,7 +164,7 @@ const EditCategory = ({ category, reload }) => {
                 </form>
             </Modal>
         </>
-    )
-}
+    );
+};
 
-export default EditCategory
+export default EditCategory;

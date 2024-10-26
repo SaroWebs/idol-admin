@@ -63,13 +63,17 @@ class CartItemController extends Controller
         $cx = new CustomerController();
         $customer = $cx->get_customer($request);
         if (!$customer instanceof Customer) {
-            return $customer; // This will return the error response if authentication failed
+            return $customer;
         }
-        $cartItem = CartItem::where('product_id', $product->id)->first();
+        $cartItem = CartItem::firstWhere([
+            ['product_id', '=', $product->id],
+            ['customer_id', '=', $customer->id]
+        ]);
 
 
         if ($cartItem->customer_id !== $customer->id) {
-            return response()->json(['message' => 'Unauthorized access to cart item'], 403);
+            $mess = 'Cart owner'.$cartItem->customer_id.', But user id :'.$customer->id;
+            return response()->json(['message' => $mess], 403);
         }
 
         if ($cartItem->delete()) {
