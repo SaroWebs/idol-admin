@@ -10,6 +10,40 @@ class ProductController extends Controller
 {
 
 
+    public function getProductsData(Request $request)
+    {
+        $page = $request->input('page', 1);
+        $perPage = $request->input('per_page', 10);
+        $sortBy = $request->input('sort_by', 'name');
+        $sort = $request->input('sort', 'asc');
+
+        // Fetch products with images
+        $products = Product::with('images')
+            ->orderBy($sortBy, $sort)
+            ->paginate($perPage, ['*'], 'page', $page);
+
+        // Assuming you have a method to get categories by their IDs
+        $categories = $this->getCategoriesByIds($products->pluck('category_id')->unique());
+
+        // Add category information to each product
+        $products->getCollection()->transform(function ($product) use ($categories) {
+            $product->category = $categories[$product->category_id] ?? null; // Add category or null if not found
+            return $product;
+        });
+
+        return response()->json($products);
+    }
+
+    /**
+     * This method would return an associative array of categories keyed by their ID.
+     * You should implement this method to fetch categories from your database or any other source.
+     */
+    private function getCategoriesByIds($categoryIds)
+    {
+        // Assuming you have a Category model
+        return Category::whereIn('id', $categoryIds)->get()->keyBy('id')->toArray();
+    }
+
     public function getproducts(Request $request)
     {
         // Validate query parameters with default values

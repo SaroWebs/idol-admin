@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Order;
 use App\Models\CartItem;
 use App\Models\CustomerLogin;
 use App\Models\CustomerAddress;
@@ -27,5 +28,10 @@ class Customer extends Model
     public function cartItems()
     {
         return $this->hasMany(CartItem::class);
+    }
+
+    public function orders()
+    {
+        return $this->hasMany(Order::class);
     }
 }

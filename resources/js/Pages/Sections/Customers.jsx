@@ -3,18 +3,39 @@ import MasterLayout from '@/Layouts/MasterLayout'
 import { Head } from '@inertiajs/react'
 import { Button, Table } from '@mantine/core'
 import { CircleIcon } from 'lucide-react'
-import React from 'react'
+import React, {useState, useEffect} from 'react'
 
 const Customers = (props) => {
+  
+  const [customerData, setCustomerData]=useState(null)
+  const [isLoading, setIsLoading]=useState(false);
 
-  const elements = [
-    { id:1, name: "hgfhf", phone:'243254' ,email: 'abc@gmail.cim', image_url:'' },
-    { id:2, name: "hhhhhhh", phone:'09808', email: 'abc@gmail.cim', image_url:'' },
-    { id:3, name: "hhhhhhh", phone:'09808', email: 'abc@gmail.cim', image_url:'' },
-    { id:4, name: "hhhhhhh", phone:'09808', email: 'abc@gmail.cim', image_url:'' },
-  ];
+  const getData = ()=>{
+   setIsLoading(false);
+    axios.get('data/customers')
+    .then(res=>{
+      setCustomerData(res.data);
+    }).catch(error=>{
+    console.log(error.message);
+    }).finally(()=>{
+    setIsLoading(false);
+    });
+  }
 
-  const rows = elements.map((element) => (
+useEffect(()=>{
+  getData();
+},[]);
+
+
+useEffect(()=>{
+  if(customerData && customerData.data){
+    console.log('Supposed to be changed');
+  }
+},[customerData]);
+
+
+
+  const rows = customerData && customerData.data && customerData.data.map((element) => (
     <Table.Tr key={element.id}>
       <Table.Td>
         {element.image_url ? (
@@ -28,8 +49,9 @@ const Customers = (props) => {
       <Table.Td>{element.phone}</Table.Td>
       <Table.Td>
         <div className="flex gap-2">
-          <Button>Edit</Button>
-          <Button>Remove</Button>
+          <Button>
+            View
+          </Button>
         </div>
       </Table.Td>
     </Table.Tr>

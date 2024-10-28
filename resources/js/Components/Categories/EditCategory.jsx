@@ -43,28 +43,28 @@ const EditCategory = ({ category, reload }) => {
    
     const handleSubmit = (e) => {
         e.preventDefault();
-        
         const fd = new FormData();
         fd.append('name', formInfo.name);
         fd.append('description', formInfo.description);
         fd.append('status', formInfo.status); // Ensure status is included
     
-        if (formInfo.icon) {
+        if (formInfo.icon.file) {
             fd.append('icon', formInfo.icon.file);
         }
     
-        if (formInfo.image) {
+        if (formInfo.image.file) {
             fd.append('image', formInfo.image.file);
         }
     
-        axios.put(`/categories/${category.id}`, fd, {
+        axios.post(`/categories/${category.id}/update`, fd, {
             headers: {
                 'Content-Type': 'multipart/form-data',
             },
         })
         .then(res => {
             console.log(res.data);
-            
+            reload();
+            close();
         })
         .catch(err => {
             console.error('Error updating category:', err.message);

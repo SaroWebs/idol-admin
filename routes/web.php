@@ -4,8 +4,11 @@ use Inertia\Inertia;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Foundation\Application;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\OrderController;
+use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\CustomerController;
 
 /*
 |--------------------------------------------------------------------------
@@ -46,8 +49,27 @@ Route::middleware('auth')->group(function () {
     Route::controller(CategoryController::class)->group(function () {
         Route::get('/data/categories', 'get_all');
         Route::post('/categories/new', 'store');
-        Route::put('/categories/{category}', 'update');
+        Route::post('/categories/{category}/update', 'update');
         Route::delete('/data/categories/{category}', 'destroy');
+    });
+
+    Route::controller(CustomerController::class)->group(function(){
+        Route::get('data/customers', 'getCustomers');
+        Route::post('customers/new', 'store');
+        Route::post('customers/{customer}/update', 'update');
+        Route::delete('customers/{customer}', 'destroy');
+
+    });
+    Route::controller(OrderController::class)->group(function(){
+        Route::get('data/orders/all', 'getAllOrders');
+        Route::get('data/orders', 'get_orders_data');
+        Route::get('data/order/{order}', 'getOrderInfo');
+        Route::post('order/{order}/cancel', 'cancelOrder');
+        Route::post('order/{order}/approve', 'approveOrder');
+        Route::post('order/{order}/process', 'processOrder');
+    });
+    Route::controller(ProductController::class)->group(function(){
+        Route::get('data/products', 'getProductsData');
     });
 });
 
