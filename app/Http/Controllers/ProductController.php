@@ -45,6 +45,79 @@ class ProductController extends Controller
         return response()->json($products);
     }
 
+    public function exportCSV()
+    {
+        $filename = 'products.csv';
+
+        $headers = [
+            'Content-Type' => 'text/csv',
+            'Content-Disposition' => "attachment; filename=\"$filename\"",
+        ];
+
+        return response()->stream(function () {
+            $handle = fopen('php://output', 'w');
+
+            // Add CSV headers
+            fputcsv($handle, [
+                'Name',
+                'Code',
+                'Details',
+                'Top (Y/N)',
+                'Featured (Y/N)',
+                'Key Details',
+                'Description Details',
+                'SIP Details',
+                'Other Details',
+                'Price',
+                'Discount',
+                'Offer Price',
+                'Manufacturer Name',
+                'Total Quantity',
+                'Alert Quantity',
+                'Category ID',
+                'Subcategory ID',
+                'Tax ID',
+                'Prescription (1/0)',
+                'Status (0/1)',
+                'Returnable (0/1)',
+                'Return Time (Days)',
+            ]);
+
+            // Fetch and process data in chunks
+            Product::chunk(25, function ($products) use ($handle) {
+                foreach ($products as $product) {
+                    $data = [
+                        $product->name,
+                        $product->code,
+                        $product->details,
+                        $product->top ? 'Y' : 'N',
+                        $product->feat ? 'Y' : 'N',
+                        $product->k_details,
+                        $product->d_details,
+                        $product->sip_details,
+                        $product->o_details,
+                        $product->price,
+                        $product->discount,
+                        $product->offer_price,
+                        $product->mfg_name,
+                        $product->total_qty,
+                        $product->alert_qty,
+                        $product->category_id,
+                        $product->subcategory_id ?? '', // Handle null
+                        $product->tax_id,
+                        $product->prescription,
+                        $product->status,
+                        $product->returnable,
+                        $product->return_time,
+                    ];
+
+                    fputcsv($handle, $data);
+                }
+            });
+
+            fclose($handle);
+        }, 200, $headers);
+    }
     /**
      * This method would return an associative array of categories keyed by their ID.
      * You should implement this method to fetch categories from your database or any other source.

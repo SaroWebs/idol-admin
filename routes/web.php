@@ -74,6 +74,7 @@ Route::middleware('auth')->group(function () {
         Route::post('data/product', 'store');
         Route::post('data/product/{product}/update', 'update');
         Route::get('/product/code/{code}/check', 'check_code');
+        Route::get('/products/export', 'exportCSV');
     });
     Route::controller(ProductImageController::class)->group(function(){
         Route::post('/product/{product}/product-image/new', 'store');
