@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Tax;
+use App\Models\User;
 use Inertia\Inertia;
 use App\Models\Category;
 use Illuminate\Http\Request;
@@ -54,7 +55,13 @@ class HomeController extends Controller
     
     public function trips()
     {
-        return Inertia::render('Sections/Trips');
+        $drivers = User::whereHas('role', function ($query) {
+            $query->where('code', 4);
+        })->get();
+
+        return Inertia::render('Sections/Trips',[
+            'drivers'=>$drivers
+        ]);
     }
     
     public function settings()

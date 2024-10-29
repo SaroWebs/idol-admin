@@ -9,6 +9,8 @@ import AddMedicine from './AddMedicine';
 import AddProductImage from './AddProductImage';
 import EditMedicine from './EditMedicine';
 import axios from 'axios';
+import ImportMedicine from './ImportMedicine';
+import ExportMedicine from './ExportMedicine';
 
 const Medicine = (props) => {
   const [productsData, setProductsData] = useState(null);
@@ -102,6 +104,7 @@ const Medicine = (props) => {
             <h1 className="text-3xl font-bold">List of Medicines</h1>
             <div className="flex gap-2">
               <ImportMedicine/>
+              <ExportMedicine/>
               <AddMedicine reload={getData} categories={props.categories} taxes={props.taxes} />
             </div>
           </div>
