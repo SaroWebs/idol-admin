@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Tax;
 use Inertia\Inertia;
+use App\Models\Category;
 use Illuminate\Http\Request;
 
 class HomeController extends Controller
@@ -37,7 +39,12 @@ class HomeController extends Controller
 
     public function medicine()
     {
-        return Inertia::render('Sections/Medicine');
+        $cats = Category::get();
+        $taxes = Tax::get();
+        return Inertia::render('Sections/Medicine/index',[
+            'categories'=> $cats,
+            'taxes'=>$taxes
+        ]);
     }
 
     public function orders()

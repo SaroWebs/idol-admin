@@ -16,10 +16,21 @@ class ProductController extends Controller
         $perPage = $request->input('per_page', 10);
         $sortBy = $request->input('sort_by', 'name');
         $sort = $request->input('sort', 'asc');
+        $searchTerm = $request->input('search', ''); // Get the search term from the request
 
-        // Fetch products with images
-        $products = Product::with('images')
-            ->orderBy($sortBy, $sort)
+        // Fetch products with images, applying search filter if provided
+        $query = Product::with('images');
+
+        // Apply search filter if a search term is provided
+        if (!empty($searchTerm)) {
+            $query->where(function ($query) use ($searchTerm) {
+                $query->where('name', 'like', '%' . $searchTerm . '%')
+                    ->orWhere('code', 'like', '%' . $searchTerm . '%');
+            });
+        }
+
+        // Order and paginate the results
+        $products = $query->orderBy($sortBy, $sort)
             ->paginate($perPage, ['*'], 'page', $page);
 
         // Assuming you have a method to get categories by their IDs
@@ -92,7 +103,134 @@ class ProductController extends Controller
         return response()->json($productsArray);
     }
 
+    public function check_code($code)
+    {
+        $exists = Product::where('code', $code)->exists();
 
+        return response()->json([
+            'available' => !$exists
+        ], $exists ? 409 : 200);
+    }
+
+    public function store(Request $request)
+    {
+        // Validate incoming request data
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'code' => 'nullable|string|unique:products,code|max:255',
+            'details' => 'nullable|string',
+            'top' => 'nullable|in:Y,N',
+            'feat' => 'nullable|in:Y,N',
+            'k_details' => 'nullable|string',
+            'd_details' => 'nullable|string',
+            'sip_details' => 'nullable|string',
+            'o_details' => 'nullable|string',
+            'price' => 'nullable|numeric|min:0',
+            'discount' => 'nullable|numeric|min:0|max:100',
+            'offer_price' => 'nullable|numeric|min:0',
+            'mfg_name' => 'nullable|string|max:255',
+            'total_qty' => 'nullable|integer|min:0',
+            'alert_qty' => 'nullable|integer|min:0',
+            'category_id' => 'nullable|exists:categories,id',
+            'tax_id' => 'nullable|exists:taxes,id',
+            'prescription' => 'nullable|boolean',
+            'status' => 'nullable|boolean',
+            'returnable' => 'nullable|boolean',
+            'return_time' => 'nullable|integer|min:0'
+        ]);
+
+        // Create a new product with defaults as specified in the schema
+        $product = new Product();
+        $product->name = $request->name;
+        $product->code = $request->code;
+        $product->details = $request->details;
+        $product->top = $request->top;
+        $product->feat = $request->feat;
+        $product->k_details = $request->k_details;
+        $product->d_details = $request->d_details;
+        $product->sip_details = $request->sip_details;
+        $product->o_details = $request->o_details;
+        $product->price = $request->price ?? 0.00;
+        $product->discount = $request->discount ?? 0.00;
+        $product->offer_price = $request->offer_price ?? ($product->price - ($product->price * $product->discount / 100));
+        $product->mfg_name = $request->mfg_name;
+        $product->total_qty = $request->total_qty ?? 0;
+        $product->alert_qty = $request->alert_qty ?? 5;
+        $product->category_id = $request->category_id;
+        $product->tax_id = $request->tax_id;
+        $product->prescription = $request->prescription ?? 0;
+        $product->status = $request->status ?? 0;
+        $product->returnable = $request->returnable ?? 0;
+        $product->return_time = $request->returnable ? ($request->return_time ?? 0) : 0;
+
+        // Save the product to the database
+        $product->save();
+
+        // Return a success response
+        return response()->json([
+            'message' => 'Product created successfully!',
+            'product' => $product
+        ], 201);
+    }
+
+    public function update(Request $request, Product $product)
+    {
+        // Validate incoming request data
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'code' => 'nullable|string|unique:products,code,' . $product->id . '|max:255',
+            'details' => 'nullable|string',
+            'top' => 'nullable|in:Y,N',
+            'feat' => 'nullable|in:Y,N',
+            'k_details' => 'nullable|string',
+            'd_details' => 'nullable|string',
+            'sip_details' => 'nullable|string',
+            'o_details' => 'nullable|string',
+            'price' => 'nullable|numeric|min:0',
+            'discount' => 'nullable|numeric|min:0|max:100',
+            'offer_price' => 'nullable|numeric|min:0',
+            'mfg_name' => 'nullable|string|max:255',
+            'total_qty' => 'nullable|integer|min:0',
+            'alert_qty' => 'nullable|integer|min:0',
+            'category_id' => 'nullable|exists:categories,id',
+            'prescription' => 'nullable|boolean',
+            'status' => 'nullable|boolean',
+            'returnable' => 'nullable|boolean',
+            'return_time' => 'nullable|integer|min:0'
+        ]);
+
+        // Update product attributes
+        $product->name = $request->name;
+        $product->code = $request->code;
+        $product->details = $request->details;
+        $product->top = $request->top;
+        $product->feat = $request->feat;
+        $product->k_details = $request->k_details;
+        $product->d_details = $request->d_details;
+        $product->sip_details = $request->sip_details;
+        $product->o_details = $request->o_details;
+        $product->price = $request->price ?? $product->price; // Keep existing if not provided
+        $product->discount = $request->discount ?? $product->discount; // Keep existing if not provided
+        $product->offer_price = $request->offer_price ?? ($product->price - ($product->price * $product->discount / 100));
+        $product->mfg_name = $request->mfg_name;
+        $product->total_qty = $request->total_qty ?? $product->total_qty; // Keep existing if not provided
+        $product->alert_qty = $request->alert_qty ?? $product->alert_qty; // Keep existing if not provided
+        $product->category_id = $request->category_id;
+        $product->tax_id = $request->tax_id ?? '';
+        $product->prescription = $request->prescription ?? $product->prescription; // Keep existing if not provided
+        $product->status = $request->status ?? $product->status; // Keep existing if not provided
+        $product->returnable = $request->returnable ?? $product->returnable; // Keep existing if not provided
+        $product->return_time = $request->returnable ? ($request->return_time ?? $product->return_time) : 0;
+
+        // Save the updated product to the database
+        $product->save();
+
+        // Return a success response
+        return response()->json([
+            'message' => 'Product updated successfully!',
+            'product' => $product
+        ], 200);
+    }
 
     public function getitem(Product $product)
     {

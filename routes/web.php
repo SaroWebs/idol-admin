@@ -9,6 +9,7 @@ use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\CustomerController;
+use App\Http\Controllers\ProductImageController;
 
 /*
 |--------------------------------------------------------------------------
@@ -70,6 +71,13 @@ Route::middleware('auth')->group(function () {
     });
     Route::controller(ProductController::class)->group(function(){
         Route::get('data/products', 'getProductsData');
+        Route::post('data/product', 'store');
+        Route::post('data/product/{product}/update', 'update');
+        Route::get('/product/code/{code}/check', 'check_code');
+    });
+    Route::controller(ProductImageController::class)->group(function(){
+        Route::post('/product/{product}/product-image/new', 'store');
+        Route::delete('/product-image/{productImage}', 'destroy');
     });
 });
 
