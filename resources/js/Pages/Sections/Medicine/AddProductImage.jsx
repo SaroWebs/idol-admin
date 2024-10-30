@@ -10,19 +10,13 @@ const AddProductImage = ({ product, reload }) => {
     const [uploadedImages, setUploadedImages] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
 
-    useEffect(() => {
-        if (opened) {
-            console.log("Existing images:", existingImages);
-            console.log("Uploaded images:", uploadedImages);
-        }
-    }, [opened, existingImages, uploadedImages]);
 
     const handleUploadImages = (event) => {
         const files = Array.from(event.target.files);
         const newUploadedImages = files.map((file) => ({
-            id: Date.now() + file.name,  // Unique ID for each image
-            image_path: URL.createObjectURL(file),  // Temporary URL for preview
-            file,  // Store the file for upload handling
+            id: Date.now() + file.name, 
+            image_path: URL.createObjectURL(file), 
+            file,
         }));
         setUploadedImages((prev) => [...prev, ...newUploadedImages]);
     };
@@ -45,8 +39,7 @@ const AddProductImage = ({ product, reload }) => {
         setIsLoading(true);
         const formData = new FormData();
 
-        uploadedImages.forEach((img) => formData.append('images[]', img.file)); // Note the use of 'images[]' to match the backend
-
+        uploadedImages.forEach((img) => formData.append('images[]', img.file));
         try {
             const response = await axios.post(`/product/${product.id}/product-image/new`, formData, {
                 headers: { 'Content-Type': 'multipart/form-data' },

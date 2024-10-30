@@ -4,6 +4,7 @@ use Inertia\Inertia;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Foundation\Application;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\TripController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProfileController;
@@ -79,6 +80,11 @@ Route::middleware('auth')->group(function () {
     Route::controller(ProductImageController::class)->group(function(){
         Route::post('/product/{product}/product-image/new', 'store');
         Route::delete('/product-image/{productImage}', 'destroy');
+    });
+    Route::controller(TripController::class)->group(function(){
+        Route::get('/data/trips', 'getData');
+        Route::post('/trip/new', 'store');
+        
     });
 });
 

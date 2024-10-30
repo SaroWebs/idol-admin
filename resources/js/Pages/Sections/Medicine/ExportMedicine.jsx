@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import { Button } from '@mantine/core';
 import axios from 'axios';
 import React from 'react';
@@ -28,3 +29,20 @@ const ExportMedicine = () => {
 };
 
 export default ExportMedicine;
+=======
+import { Button } from '@mantine/core'
+import React from 'react'
+
+const ExportMedicine = () => {
+  const handleExport=()=>{
+    // export csv to 
+  }
+  return (
+    <>
+      <Button onClick={handleExport} color={'orange'}>Export</Button>
+    </>
+  )
+}
+
+export default ExportMedicine
+>>>>>>> 300597030a64cea06392d2d1db56898b18393714

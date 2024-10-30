@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import { Button, Modal, FileInput, Progress, Notification, Text } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import React, { useState } from 'react';
@@ -78,6 +79,27 @@ const ImportMedicine = () => {
               {notification.message}
             </Notification>
           )}
+=======
+import { Button, Modal } from '@mantine/core';
+import { useDisclosure } from '@mantine/hooks'
+import React from 'react'
+
+const ImportMedicine = () => {
+  const [opened, { open, close }] = useDisclosure(false);
+
+  const handleUpload=()=>{
+    // upload to /product/import
+  }
+  return (
+    <>
+      <Button onClick={open} color={'purple'}>Import</Button>
+      <Modal onClose={close} opened={opened} size={'60%'}>
+        <div className="">
+        {/* input csv file*/}
+        {/* uploaded file information  */}
+        {/* upload button */}
+        {/* upload progress */}
+>>>>>>> 300597030a64cea06392d2d1db56898b18393714
         </div>
       </Modal>
     </>

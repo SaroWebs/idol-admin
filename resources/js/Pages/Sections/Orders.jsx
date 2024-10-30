@@ -56,6 +56,7 @@ const Orders = (props) => {
 						<Table.Th>Email</Table.Th>
 						<Table.Th>Phone No</Table.Th>
 						<Table.Th>Payment Mode</Table.Th>
+						<Table.Th>Status</Table.Th>
 						<Table.Th>Actions</Table.Th>
 					</Table.Tr>
 				</Table.Thead>
@@ -82,9 +83,13 @@ const Orders = (props) => {
 								</span>
 							</Table.Td>
 							<Table.Td>
+								<span className="capitalize">
+									{element.status}
+								</span>
+							</Table.Td>
+							<Table.Td>
 								<div className="flex gap-2">
 									<ViewOrder order={element} reload={getData} />
-
 								</div>
 							</Table.Td>
 						</Table.Tr>
