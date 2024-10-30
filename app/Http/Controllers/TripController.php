@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Carbon\Carbon;
 use App\Models\Trip;
 use App\Models\Order;
+use App\Models\TripItem;
 use Illuminate\Http\Request;
 
 class TripController extends Controller
@@ -64,4 +65,42 @@ class TripController extends Controller
         $orders = Order::where('status', 'processed')->get();
         return response()->json($orders);
     }
+
+    
+    public function assignOrder(Request $request)
+    {
+        // Validate the incoming request data
+        $request->validate([
+            'trip_id' => 'required|exists:trips,id',
+            'order_id' => 'required|exists:orders,id',
+            'status' => 'required|string',
+            'receivable_amount' => 'required|numeric',
+        ]);
+    
+        // Find the order by ID
+        $order = Order::find($request->order_id);
+        if (!$order) {
+            return response()->json(['message' => 'Order not found.'], 404);
+        }
+    
+        // Update the order status
+        $order->status = 'onway'; // Assuming 'onway' is the new status
+        $order->save();
+    
+        // Create a new TripItem record
+        $tripItem = new TripItem();
+        $tripItem->trip_id = $request->trip_id;
+        $tripItem->order_id = $order->id;
+        $tripItem->status = $request->status; // e.g., 'out_of_delivery'
+        $tripItem->receivable_amount = $request->receivable_amount;
+        
+        // Save the TripItem
+        if ($tripItem->save()) {
+            return response()->json(['message' => 'Order assigned successfully.', 'trip_item' => $tripItem], 201);
+        } else {
+            return response()->json(['message' => 'Failed to assign the order.'], 500);
+        }
+    }
+
+
 }

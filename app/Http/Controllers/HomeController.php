@@ -68,4 +68,13 @@ class HomeController extends Controller
     {
         return Inertia::render('Sections/Settings');
     }
+    
+    public function delivery_account()
+    {
+        return Inertia::render('Sections/Delivery/Account');
+    }
+    public function delivery_orders()
+    {
+        return Inertia::render('Sections/Delivery/OrdersList');
+    }
 }

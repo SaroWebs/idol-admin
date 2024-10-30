@@ -40,6 +40,8 @@ Route::middleware('auth')->group(function () {
         Route::get('/orders', 'orders');
         Route::get('/trips', 'trips');
         Route::get('/settings', 'settings');
+        Route::get('/d/account', 'delivery_account');
+        Route::get('/d/orders', 'delivery_orders');
     });
 
     Route::controller(ProfileController::class)->group(function () {
@@ -84,8 +86,12 @@ Route::middleware('auth')->group(function () {
     Route::controller(TripController::class)->group(function(){
         Route::get('/data/trips', 'getData');
         Route::post('/trip/new', 'store');
+        Route::post('/trip/assign-order', 'assignOrder');
         Route::get('/orders/processed/get', 'getProcessedOrder');
-
+        
+        Route::post('/data/delivery/trips', 'getDriversTrip');
+        // Route::post('/data/delivery/trips/{tripItem}/deliver', 'deliverTripItem');
+        // Route::post('/data/delivery/trips/{tripItem}/cancel', 'cancelTripItem');
         
     });
 });
