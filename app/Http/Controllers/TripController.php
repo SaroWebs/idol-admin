@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Carbon\Carbon;
 use App\Models\Trip;
+use App\Models\Order;
 use Illuminate\Http\Request;
 
 class TripController extends Controller
@@ -22,18 +23,18 @@ class TripController extends Controller
         $perPage = $request->input('per_page', 10);
         $searchTerm = $request->input('search', '');
 
-        $query = Trip::with(['user','tripItems']);
+        $query = Trip::with(['user', 'tripItems']);
 
         if ($searchTerm) {
-            $query->where(function($q) use ($searchTerm) {
+            $query->where(function ($q) use ($searchTerm) {
                 $q->where('user_id', 'LIKE', '%' . $searchTerm . '%')
-                  ->orWhere('instructions', 'LIKE', '%' . $searchTerm . '%')
-                  ->orWhereDate('trip_date', 'LIKE', '%' . $searchTerm . '%');
+                    ->orWhere('instructions', 'LIKE', '%' . $searchTerm . '%')
+                    ->orWhereDate('trip_date', 'LIKE', '%' . $searchTerm . '%');
             });
         }
-        
+
         $trips = $query->orderBy('trip_date', 'desc')
-                       ->paginate($perPage, ['*'], 'page', $currentPage);
+            ->paginate($perPage, ['*'], 'page', $currentPage);
 
         return response()->json($trips);
     }
@@ -56,5 +57,11 @@ class TripController extends Controller
             'message' => 'Trip created successfully',
             'trip' => $trip,
         ], 201); // 201 Created
+    }
+
+    public function getProcessedOrder()
+    {
+        $orders = Order::where('status', 'processed')->get();
+        return response()->json($orders);
     }
 }

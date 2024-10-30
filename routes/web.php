@@ -84,6 +84,8 @@ Route::middleware('auth')->group(function () {
     Route::controller(TripController::class)->group(function(){
         Route::get('/data/trips', 'getData');
         Route::post('/trip/new', 'store');
+        Route::get('/orders/processed/get', 'getProcessedOrder');
+
         
     });
 });

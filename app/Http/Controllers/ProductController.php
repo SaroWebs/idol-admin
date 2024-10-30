@@ -57,7 +57,7 @@ class ProductController extends Controller
         return response()->stream(function () {
             $handle = fopen('php://output', 'w');
 
-            // Add CSV headers
+            
             fputcsv($handle, [
                 'Name',
                 'Code',
@@ -90,8 +90,8 @@ class ProductController extends Controller
                         $product->name,
                         $product->code,
                         $product->details,
-                        $product->top ? 'Y' : 'N',
-                        $product->feat ? 'Y' : 'N',
+                        $product->top,
+                        $product->feat,
                         $product->k_details,
                         $product->d_details,
                         $product->sip_details,
@@ -118,6 +118,7 @@ class ProductController extends Controller
             fclose($handle);
         }, 200, $headers);
     }
+    
     /**
      * This method would return an associative array of categories keyed by their ID.
      * You should implement this method to fetch categories from your database or any other source.

@@ -8,6 +8,7 @@ use App\Models\Category;
 use App\Models\Pincodes;
 use App\Models\UserRole;
 use App\Models\CoreImage;
+use App\Models\Subcategory;
 use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
@@ -31,7 +32,7 @@ class DatabaseSeeder extends Seeder
         }
 
         // Create an Admin user
-        $adminRole = UserRole::where('name', 'admin')->first();
+        $adminRole = UserRole::where('code', 1)->first();
         User::updateOrCreate(
             ['email' => 'admin@idol.com'],
             [
@@ -45,7 +46,9 @@ class DatabaseSeeder extends Seeder
         // Seed pincodes
         $pincodes = [
             ['pin' => '781001', 'description' => 'Panbazar, Fancy Bazar', 'distance' => 4.5],
+            ['pin' => '781002', 'description' => '', 'distance' => 3],
             ['pin' => '781003', 'description' => 'Silpukhuri', 'distance' => 3.5],
+            ['pin' => '781004', 'description' => 'Dispur', 'distance' => 8.0],
             ['pin' => '781005', 'description' => 'Dispur', 'distance' => 8.0],
             ['pin' => '781010', 'description' => 'Kamakhya', 'distance' => 8.5],
             ['pin' => '781019', 'description' => 'Kahilipara', 'distance' => 7.0],
@@ -77,23 +80,22 @@ class DatabaseSeeder extends Seeder
         // Seed categories
         $categories = [
             ['name' => 'All', 'icon_path' => '/images/category-icon/all.png', 'status' => 1],
-            ['name' => 'Ayurvedic', 'icon_path' => '/images/category-icon/ayurvedic.png', 'status' => 1],
             ['name' => 'Covid Essential', 'icon_path' => '/images/category-icon/covit-essential.jpg', 'status' => 1],
-            ['name' => 'Device & Surgical', 'icon_path' => '/images/category-icon/device-surgical.png', 'status' => 1],
-            ['name' => 'Diabetes', 'icon_path' => '/images/category-icon/diabetes.png', 'status' => 1],
-            ['name' => 'First Aid', 'icon_path' => '/images/category-icon/first-aid.png', 'status' => 1],
             ['name' => 'Fitness', 'icon_path' => '/images/category-icon/fitness.png', 'status' => 1],
-            ['name' => 'Health', 'icon_path' => '/images/category-icon/health.png', 'status' => 1],
             ['name' => 'Mom & Baby', 'icon_path' => '/images/category-icon/mom-baby.png', 'status' => 1],
-            ['name' => 'Personal Care', 'icon_path' => '/images/category-icon/personal-care.png', 'status' => 1],
+            ['name' => 'Device & Surgical', 'icon_path' => '/images/category-icon/device-surgical.png', 'status' => 1],
+            ['name' => 'First Aid', 'icon_path' => '/images/category-icon/first-aid.png', 'status' => 1],
             ['name' => 'Prescription Drugs', 'icon_path' => '/images/category-icon/presc-drug.png', 'status' => 1],
+            ['name' => 'Ayurvedic', 'icon_path' => '/images/category-icon/ayurvedic.png', 'status' => 1],
             ['name' => 'Vitamins', 'icon_path' => '/images/category-icon/vitamins.png', 'status' => 1],
+            ['name' => 'Health', 'icon_path' => '/images/category-icon/health.png', 'status' => 1],
+            ['name' => 'Personal Care', 'icon_path' => '/images/category-icon/personal-care.png', 'status' => 1],
+            ['name' => 'Diabetes', 'icon_path' => '/images/category-icon/diabetes.png', 'status' => 1],
         ];
 
         foreach ($categories as $cat) {
             Category::updateOrCreate(['name' => $cat['name']], $cat);
         }
-
-        Product::factory()->count(100)->create();
+        // Product::factory()->count(100)->create();
     }
 }

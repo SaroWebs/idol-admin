@@ -29,7 +29,7 @@ return new class extends Migration
             $table->integer('total_qty')->default(0);
             $table->integer('alert_qty')->default(5);
             $table->foreignId('category_id')->nullable()->constrained('categories')->onDelete('set null');
-            $table->foreignId('subcategory_id')->nullable()->constrained('subcategories')->onDelete('set null');
+            $table->bigInteger('subcategory_id')->nullable();
             $table->foreignId('tax_id')->nullable()->constrained('taxes')->onDelete('set null');
             $table->boolean('prescription')->default(0);
             $table->unsignedTinyInteger('status')->default(0);
