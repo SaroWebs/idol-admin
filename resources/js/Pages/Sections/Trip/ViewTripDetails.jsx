@@ -23,8 +23,8 @@ const ViewTripDetails = (props) => {
                     <div className="mb-4">
                         <Text size="md"><strong>Trip Date:</strong> {trip.trip_date}</Text>
                         <Text size="md"><strong>Driver:</strong> {trip.user?.name || 'N/A'}</Text>
-                        <Text size="md"><strong>Total Collection:</strong> ${trip.total_collection}</Text>
-                        <Text size="md"><strong>Total Orders:</strong> {trip.total_orders}</Text>
+                        <Text size="md"><strong>Total Collection:</strong> Rs {trip.total_collection}</Text>
+                        <Text size="md"><strong>Total Orders:</strong> {trip.trip_items.length || '0'}</Text>
                         <Text size="md"><strong>Instructions:</strong> {trip.instructions || 'None'}</Text>
                     </div>
                     <Divider my="sm" />
@@ -38,7 +38,7 @@ const ViewTripDetails = (props) => {
                                 <div key={item.id} className="p-2 border-b border-gray-300">
                                     <Text size="md"><strong>Order ID:</strong> {item.order_id}</Text>
                                     <Text size="md"><strong>Status:</strong> {item.status}</Text>
-                                    <Text size="md"><strong>Receivable Amount:</strong> ${item.receivable_amount}</Text>
+                                    <Text size="md"><strong>Receivable Amount:</strong> Rs {item.receivable_amount}</Text>
                                 </div>
                             ))
                         ) : (

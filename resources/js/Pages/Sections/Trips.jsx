@@ -56,7 +56,7 @@ const Trips = (props) => {
 			<Table.Td>{element.trip_date}</Table.Td>
 			<Table.Td>{element.user?.name}</Table.Td>
 			<Table.Td>{element.total_collection}</Table.Td>
-			<Table.Td>{element.total_orders}</Table.Td>
+			<Table.Td>{element.trip_items?.length}</Table.Td>
 			<Table.Td>{element.instructions}</Table.Td>
 			<Table.Td>
 				<div className="flex gap-2">

@@ -1,7 +1,7 @@
 import BreadcrumbsComponent from '@/Components/BreadcrumbComponent'
 import MasterLayout from '@/Layouts/MasterLayout'
 import { Head } from '@inertiajs/react'
-import { Tabs } from '@mantine/core'
+import { Stack, Tabs } from '@mantine/core'
 import React from 'react'
 import Banner from './Setting/HomePage/Banner'
 import PincodeList from './Setting/PincodeList'
@@ -34,20 +34,20 @@ const Settings = (props) => {
                         </Tabs.List>
 
                         <Tabs.Panel value="home">
-                            <h2>Home Page Settings</h2>
-                            {/* Add content for Home Page Settings */}
-                            <Banner/>
+                            <Stack gap={'sm'}>
+                                <Banner/>
+
+                            </Stack>
                         </Tabs.Panel>
 
                         <Tabs.Panel value="user-management">
-                            <h2>User Management Settings</h2>
-                            {/* Add content for User Management Settings */}
-                            <UserManagement/>
+                            <Stack gap={'sm'}>
+                                <UserManagement {...props}/>
+                            </Stack>
                         </Tabs.Panel>
 
                         <Tabs.Panel value="role-management">
                             <h2>Role Management Settings</h2>
-                            {/* Add content for Role Management Settings */}
                             <RoleManagement/>
                         </Tabs.Panel>
 

@@ -68,32 +68,6 @@ const OrdersList = (props) => {
                 <Text weight={500}>Trip ID: {trip.id}</Text>
                 <Text>Date: {trip.date}</Text>
                 <Text>Orders: {trip.trip_items.length} items</Text>
-
-                <div className="mt-4">
-                  <h4 className="font-semibold">Orders:</h4>
-                  {trip.trip_items.map(item => (
-                    <div key={item.id} className="flex items-center justify-between mt-2">
-                      <Text>...</Text>
-                      <div>
-                        <Button
-                          variant="outline"
-                          color="green"
-                          onClick={() => handleOrderDelivered(item.id)}
-                          className="mr-2"
-                        >
-                          Deliver
-                        </Button>
-                        <Button
-                          variant="outline"
-                          color="red"
-                          onClick={() => handleOrderCancelled(item.id)}
-                        >
-                          Cancel
-                        </Button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
               </Card>
             ))
           ) : (
