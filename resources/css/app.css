@@ -1,3 +1,13 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+.mantine-Tabs-tab {
+    background: #dbe7f3 !important;
+    color: #222121 !important;
+    border-radius: 14px 14px 0 0;
+}
+.mantine-Tabs-tab:where([data-active]) {
+    background: #053333 !important;
+    color: white !important;
+}

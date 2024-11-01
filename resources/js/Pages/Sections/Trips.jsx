@@ -7,6 +7,8 @@ import { EyeIcon } from 'lucide-react';
 import { useDisclosure } from '@mantine/hooks';
 import axios from 'axios';
 import AddTrip from './Trip/AddTrip';
+import AssignOrder from './Trip/AssignOrder';
+import ViewTripDetails from './Trip/ViewTripDetails';
 
 const Trips = (props) => {
 	const [tripsData, setTripsData] = useState(null);
@@ -54,7 +56,7 @@ const Trips = (props) => {
 			<Table.Td>{element.trip_date}</Table.Td>
 			<Table.Td>{element.user?.name}</Table.Td>
 			<Table.Td>{element.total_collection}</Table.Td>
-			<Table.Td>{element.total_orders}</Table.Td>
+			<Table.Td>{element.trip_items?.length}</Table.Td>
 			<Table.Td>{element.instructions}</Table.Td>
 			<Table.Td>
 				<div className="flex gap-2">
@@ -79,7 +81,7 @@ const Trips = (props) => {
 					<div className="flex justify-between items-center">
 						<h1 className="text-3xl font-bold">List of Trips</h1>
 						<div className="flex gap-2">
-							<AddTrip drivers={props.drivers}/>
+							<AddTrip drivers={props.drivers} />
 						</div>
 					</div>
 
@@ -149,30 +151,3 @@ const Trips = (props) => {
 };
 
 export default Trips;
-
-const ViewTripDetails = (props) => {
-	const { trip } = props;
-	const [opened, { open, close }] = useDisclosure(false);
-
-	return (
-		<>
-			<ActionIcon onClick={open} variant="filled" color='cyan' aria-label="View">
-				<EyeIcon className='w-4' />
-			</ActionIcon>
-			<Modal
-				opened={opened}
-				onClose={close}
-				size={'xl'}
-			>
-				{/* Here you can add the trip details display */}
-				<h2 className="text-xl font-bold">Trip Details</h2>
-				<p><strong>Trip Date:</strong> {trip.trip_date}</p>
-				<p><strong>Driver:</strong> {trip.user?.name}</p>
-				<p><strong>Total Collection:</strong> {trip.total_collection}</p>
-				<p><strong>Total Orders:</strong> {trip.total_orders}</p>
-				<p><strong>Instructions:</strong> {trip.instructions}</p>
-				{/* Add more details as needed */}
-			</Modal>
-		</>
-	);
-}

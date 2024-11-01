@@ -9,7 +9,6 @@ import Footer from '@/Components/Navigation/Footer';
 export default function MasterLayout(props) {
 	const { children } = props;
 
-	// Initialize sidebar state from localStorage if it exists, default to true for desktop
 	const initialSidebarState = typeof window !== 'undefined' 
 		? JSON.parse(localStorage.getItem('sidebarOpened')) ?? true 
 		: true;

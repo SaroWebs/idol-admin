@@ -1,89 +1,61 @@
 import React, { useEffect, useState } from 'react';
-import { Button, Modal, Select, Loader, Notification } from '@mantine/core';
+import { Button, Modal, Text, Group, Stack } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import axios from 'axios';
 
-const AssignOrder = (props) => {
-    const { trip, reload } = props;
+const AssignOrder = ({ trip }) => {
     const [orders, setOrders] = useState([]);
     const [selectedOrder, setSelectedOrder] = useState(null);
     const [loading, setLoading] = useState(false);
     const [opened, { open, close }] = useDisclosure(false);
 
-    const getOrders = () => {
-        setLoading(true);
-        axios.get('/orders/processed/get')
-            .then(res => {
-                setOrders(res.data);
-                setLoading(false);
-            })
-            .catch(err => {
-                console.log(err.message);
-                setLoading(false);
-            });
+    // Fetch processed orders
+    const getOrders = async () => {
+        try {
+            const res = await axios.get('/orders/processed/get');
+            setOrders(res.data);
+        } catch (err) {
+            console.error("Error fetching orders:", err.message);
+        }
     };
 
     useEffect(() => {
         getOrders();
     }, []);
 
-    const addItem = () => {
-        if (!selectedOrder) {
-            return; // Optionally show a notification that no order is selected
-        }
-
-        setLoading(true);
+    // Handle order assignment
+    const addItem = async (order) => {
         const fd = new FormData();
         fd.append('trip_id', trip.id);
-        fd.append('order_id', selectedOrder.id);
+        fd.append('order_id', order.id);
         fd.append('status', 'out_of_delivery');
-        fd.append('receivable_amount', selectedOrder.payment_mode === 'cash' ? selectedOrder.payable_amount : 0);
+        fd.append('receivable_amount', order.payment_mode === 'cash' ? order.payable_amount : 0);
 
-        axios.post('/trip/assign-order', fd)
-            .then(res => {
-                console.log(res.data);
-                reload(); // Reload the parent component data
-                close();
-                // Optionally show a success notification
-            })
-            .catch(err => {
-                console.log(err.message);
-                // Optionally show an error notification
-            })
-            .finally(() => {
-                setLoading(false);
-            });
+        try {
+            const res = await axios.post('/trip/assign-order', fd);
+            console.log("Order assigned successfully:", res.data);
+            close(); // Close modal after successful assignment
+        } catch (err) {
+            console.error("Error assigning order:", err.message);
+        }
     };
 
     return (
         <>
-            <Button onClick={open}>Assign Order</Button>
-            <Modal
-                opened={opened}
-                onClose={close}
-                title="Assign Order"
-            >
-                {loading ? (
-                    <Loader />
-                ) : (
-                    <>
-                        <Select
-                            label="Select Order"
-                            placeholder="Select an order"
-                            onChange={(value) => setSelectedOrder(value)}
-                            data={orders.map(order => ({
-                                value: order.id,
-                                label: `${order.order_no} - ${order.customer_name}`, // Customize the label as needed
-                            }))}
-                        />
-                        <Button onClick={addItem} disabled={!selectedOrder || loading}>
-                            Assign
-                        </Button>
-                    </>
-                )}
+            <Button onClick={open}>Assign Orders</Button>
+            <Modal opened={opened} onClose={close} title="Assign Orders">
+                <Text>Select orders to assign:</Text>
+                <Stack spacing="md" style={{ marginTop: '20px' }}>
+                    {orders.map(order => (
+                        <Group key={order.id} position="apart">
+                            <Text>Order #{order.order_no}</Text>
+                            <Button onClick={() => addItem(order)}>Assign</Button>
+                        </Group>
+                    ))}
+                </Stack>
             </Modal>
         </>
     );
-}
+};
 
 export default AssignOrder;

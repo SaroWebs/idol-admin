@@ -1,7 +1,13 @@
 import BreadcrumbsComponent from '@/Components/BreadcrumbComponent'
 import MasterLayout from '@/Layouts/MasterLayout'
 import { Head } from '@inertiajs/react'
+import { Stack, Tabs } from '@mantine/core'
 import React from 'react'
+import Banner from './Setting/HomePage/Banner'
+import PincodeList from './Setting/PincodeList'
+import RoleManagement from './Setting/RoleManagement'
+import TaxList from './Setting/TaxList'
+import UserManagement from './Setting/UserManagement'
 
 const Settings = (props) => {
     return (
@@ -18,13 +24,43 @@ const Settings = (props) => {
                 />
                 <h1 className="text-2xl font-bold my-4">Settings</h1>
                 <div className="content p-4 border rounded-md shadow-sm">
-                    <p>
-                        Lorem ipsum dolor sit amet consectetur adipisicing elit. Accusantium, sint voluptate et vel amet laboriosam ipsa non numquam repellat ullam labore facilis perspiciatis qui possimus odit cumque magnam autem voluptatem?
-                        Quidem corporis provident vitae nulla, praesentium rem neque laborum suscipit, iusto sapiente similique maiores reprehenderit ullam iure minima deleniti doloremque error aspernatur facere. Ullam culpa non soluta nihil natus fugit.
-                        Laborum autem quibusdam nulla nobis in officia porro enim quas. Est possimus veniam accusantium numquam odio sapiente necessitatibus, facere vero minima doloremque voluptas, earum praesentium neque totam quis repudiandae? Quo!
-                        At quo repellat enim possimus debitis est pariatur eos, explicabo aspernatur similique sapiente, natus nesciunt provident incidunt quis voluptatum temporibus beatae rerum consequatur quasi cum unde accusamus. Enim, assumenda excepturi?
-                        Suscipit voluptatibus unde perspiciatis, nostrum illum ipsa quisquam eius modi nam excepturi inventore atque temporibus. Rerum dolorum voluptatem delectus quo at? Minima accusantium debitis fugit cum, vel soluta quos iusto.
-                    </p>
+                    <Tabs defaultValue="home">
+                        <Tabs.List>
+                            <Tabs.Tab value="home">Home Page</Tabs.Tab>
+                            <Tabs.Tab value="user-management">User  Management</Tabs.Tab>
+                            <Tabs.Tab value="role-management">Role Management</Tabs.Tab>
+                            <Tabs.Tab value="delivery-locations">Delivery Locations</Tabs.Tab>
+                            <Tabs.Tab value="tax-information">Tax Information</Tabs.Tab>
+                        </Tabs.List>
+
+                        <Tabs.Panel value="home">
+                            <Stack gap={'sm'}>
+                                <Banner/>
+
+                            </Stack>
+                        </Tabs.Panel>
+
+                        <Tabs.Panel value="user-management">
+                            <Stack gap={'sm'}>
+                                <UserManagement {...props}/>
+                            </Stack>
+                        </Tabs.Panel>
+
+                        <Tabs.Panel value="role-management">
+                            <h2>Role Management Settings</h2>
+                            <RoleManagement/>
+                        </Tabs.Panel>
+
+                        <Tabs.Panel value="delivery-locations">
+                            <h2>Delivery Locations Settings</h2>
+                            <PincodeList/>
+                        </Tabs.Panel>
+
+                        <Tabs.Panel value="tax-information">
+                            <h2>Tax Information Settings</h2>
+                            <TaxList/>
+                        </Tabs.Panel>
+                    </Tabs>
                 </div>
             </div>
         </MasterLayout>

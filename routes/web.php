@@ -11,6 +11,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\ProductImageController;
+use App\Http\Controllers\CoreImageController;
 
 /*
 |--------------------------------------------------------------------------
@@ -40,6 +41,11 @@ Route::middleware('auth')->group(function () {
         Route::get('/orders', 'orders');
         Route::get('/trips', 'trips');
         Route::get('/settings', 'settings');
+        Route::get('/d/account', 'delivery_account');
+        Route::get('/d/orders', 'delivery_orders');
+
+        Route::get('/data/users', 'getUsers'); // Fetch all users
+        Route::post('/data/users', 'storeUser');
     });
 
     Route::controller(ProfileController::class)->group(function () {
@@ -84,9 +90,19 @@ Route::middleware('auth')->group(function () {
     Route::controller(TripController::class)->group(function(){
         Route::get('/data/trips', 'getData');
         Route::post('/trip/new', 'store');
+        Route::post('/trip/assign-order', 'assignOrder');
         Route::get('/orders/processed/get', 'getProcessedOrder');
-
         
+        Route::post('/data/delivery/trips', 'getDriversTrip');
+        // Route::post('/data/delivery/trips/{tripItem}/deliver', 'deliverTripItem');
+        // Route::post('/data/delivery/trips/{tripItem}/cancel', 'cancelTripItem');
+        
+    });
+
+    Route::controller(CoreImageController::class)->group(function(){
+        Route::get('/data/core-images/banner', 'getBannersData');
+        Route::post('/core-image/banner/new', 'store');
+        Route::delete('/data/core-images/banner/{coreImage}', 'destroy');
     });
 });
 
