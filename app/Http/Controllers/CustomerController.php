@@ -3,9 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\Customer;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 use App\Models\CustomerLogin;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 
 class CustomerController extends Controller
 {
@@ -118,7 +119,7 @@ class CustomerController extends Controller
     {
         // Validate the incoming request data
         $validated = $request->validate([
-            'name' => 'required|string|max:255',
+            'name' => 'nullable|string|max:255',
             'email' => 'required|email|unique:customers,email,' . $customer->id, // Ignore unique check for the current customer
             'phone' => 'required|string|max:15',
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048', // Optional image with max size of 2MB

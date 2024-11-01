@@ -60,6 +60,8 @@ Route::get('/search', [ProductController::class, 'search_item']);
 
 Route::middleware('customer')->group(function () {
     Route::get('/authenticate', [CustomerController::class, 'authenticate']);
+    Route::post('/customer/{customer}/update', [CustomerController::class, 'update']);
+    
     Route::get('/cart', [CartItemController::class, 'get_items']);
     Route::get('/cart/add-item/{product}', [CartItemController::class, 'add_item']);
     Route::get('/cart/remove-item/{product}', [CartItemController::class, 'remove_item']);
@@ -79,5 +81,7 @@ Route::middleware('customer')->group(function () {
     Route::post('/order/place', [OrderController::class, 'place']);
     Route::get('/order/{order}', [OrderController::class, 'get_order']);
     Route::get('/orders', [OrderController::class, 'get_orders']);
+
+    
 });
 
