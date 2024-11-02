@@ -25,7 +25,7 @@ class OTPController extends Controller
 
             return response()->json([
                 'message' => 'OTP sent!',
-                'test' => $c
+                // 'test' => $c
             ]);
         }
     }
@@ -51,10 +51,25 @@ class OTPController extends Controller
         }
     }
 
-    private function send_message($phone, $code)
+    private function send_message($uphone, $otp)
     {
-        // 
-        return true;
+        $message = 'Hi, '.$otp.' is the OTP for verifying your phone number. - IDOL PHARMA';
+        $message = urlencode($message);
+        
+        $getUrl = 'https://api.100coins.co/v3/getsms?apikey=cF4QgBBX89OHndEDpz3pqx90l2aeKlqc&mtype=0&mask=IDOLON&mobno='.$uphone.'&message='.$message.'&tempid=1707172128544139416&peid=1701170895114755311';
+        $ch = curl_init();
+    
+        curl_setopt($ch, CURLOPT_URL, $getUrl);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        $result = curl_exec($ch);
+        
+        if ($result === false) {
+            return false;
+        } else {
+            curl_close($ch);
+            return $result;
+        }
+    
     }
 
     public function verify_user(Request $request)

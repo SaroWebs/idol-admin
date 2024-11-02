@@ -136,7 +136,7 @@ class CustomerController extends Controller
                 Storage::disk('public')->delete($customer->image_url);                
             }
             $path = $request->file('image')->store('images/customers','public');
-            $customer->image_url = Storage::url($path);
+            $customer->image_url = $path;
         }
 
         // Save the updated customer data

@@ -140,11 +140,11 @@ class ProductController extends Controller
         // List of valid columns for ordering
         $validColumns = ['id', 'name', 'price'];
         if (!in_array($orderBy, $validColumns)) {
-            $orderBy = 'id';  // Default to 'id' if invalid column is provided
+            $orderBy = 'name';  // Default to 'id' if invalid column is provided
         }
-
+        
         // Ensure the order direction is either 'asc' or 'desc'
-        $orderDirection = $orderDirection === 'desc' ? 'desc' : 'asc';
+        $orderDirection = $orderDirection === 'asc' ? 'desc' : 'asc';
 
         // Start the product query
         $productsQuery = Product::with('images')->orderBy($orderBy, $orderDirection);

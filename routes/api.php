@@ -15,21 +15,13 @@ use App\Http\Controllers\PincodesController;
 use App\Http\Controllers\PrescriptionController;
 use App\Http\Controllers\CustomerLoginController;
 use App\Http\Controllers\CustomerAddressController;
+use App\Http\Controllers\OrderPaymentController;
 
-/*
-|--------------------------------------------------------------------------
-| API Routes
-|--------------------------------------------------------------------------
-|
-| Here is where you can register API routes for your application. These
-| routes are loaded by the RouteServiceProvider and all of them will
-| be assigned to the "api" middleware group. Make something great!
-|
-*/
 
-// Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-//     return $request->user();
-// });
+
+Route::post('payment', [OrderPaymentController::class, 'initiatePayment']);
+Route::post('payment/callback', [OrderPaymentController::class, 'paymentCallback'])->name('payment.callback');
+
 
 Route::get('/categories/all', [CategoryController::class, 'get_items']);
 Route::get('/banners/all', [CoreImageController::class, 'get_banners']);
