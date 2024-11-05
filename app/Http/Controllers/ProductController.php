@@ -313,23 +313,31 @@ class ProductController extends Controller
     }
 
     public function search_item(Request $request)
-    {
-        $search_text = $request->input('term');
+{
+    $search_text = $request->input('term');
 
-        if ($search_text) {
-            $products = Product::where('name', 'like', "%{$search_text}%")
-                ->orWhere('price', 'like', "%{$search_text}%")
-                ->orWhere('code', 'like', "%{$search_text}%")
-                ->orWhere('mfg_name', 'like', "%{$search_text}%")
-                ->with('images')
-                ->take(50)
-                ->get();
+    if ($search_text) {
+        $products = Product::where(function ($query) use ($search_text) {
+                // Prioritize products where the name starts with the search term
+                $query->where('name', 'like', "{$search_text}%")
+                      ->orWhere('name', 'like', "%{$search_text}%");
+            })
+            ->with('images')
+            ->orderByRaw("
+                CASE 
+                    WHEN name LIKE ? THEN 1
+                    WHEN name LIKE ? THEN 2
+                    ELSE 3
+                END, name ASC", ["{$search_text}%", "%{$search_text}%"])
+            ->take(50)
+            ->get();
 
-            return response()->json($products, 200);
-        } else {
-            return response()->json(null, 400);
-        }
+        return response()->json($products, 200);
+    } else {
+        return response()->json(null, 400);
     }
+}
+
 
     public function top_items()
     {
