@@ -10,8 +10,9 @@ use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\CustomerController;
-use App\Http\Controllers\ProductImageController;
 use App\Http\Controllers\CoreImageController;
+use App\Http\Controllers\PrescriptionController;
+use App\Http\Controllers\ProductImageController;
 
 /*
 |--------------------------------------------------------------------------
@@ -103,6 +104,9 @@ Route::middleware('auth')->group(function () {
         Route::get('/data/core-images/banner', 'getBannersData');
         Route::post('/core-image/banner/new', 'store');
         Route::delete('/data/core-images/banner/{coreImage}', 'destroy');
+    });
+    Route::controller(PrescriptionController::class)->group(function(){
+        Route::get('/data/prescriptions/unassigned', 'get_unassigned_items');
     });
 });
 

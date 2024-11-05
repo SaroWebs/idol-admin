@@ -168,6 +168,25 @@ class PrescriptionController extends Controller
         return response()->json(['message', 'Not found !'], 404);
     }
 
+    public function get_unassigned_items()
+    {
+        $items = Prescription::where('status', 'unassigned')->get()
+            ->groupBy('group_code');
+
+        if ($items) {
+            $result = [];
+            foreach ($items as $groupCode => $prescriptions) {
+                $result[] = [
+                    'group_code' => $groupCode,
+                    'prescriptions' => $prescriptions
+                ];
+            }
+            return response()->json($result, 200);
+        }
+        return response()->json(['message' => 'Not found!'], 404);
+        
+    }
+
     public function get_group_all(Request $request)
     {
         $customer = $this->get_customer($request);
