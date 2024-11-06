@@ -140,6 +140,67 @@ class OrderController extends Controller
     }
 
     // by customer request
+    public function store(Request $request)
+    {
+        
+        $validatedData = $request->validate([
+            'order_no' => 'required|string',
+            'customer_id' => 'required|exists:customers,id',
+            'customer_address_id' => 'required|exists:customer_addresses,id',
+            'payment_mode' => 'required|in:cash,online',
+            'payment_amount' => 'required|numeric',
+            'payment_status' => 'required|in:pending,paid,failed',
+            'prescription_id' => 'nullable',
+            'transaction_id' => 'nullable|string',
+            'products' => 'required|array',
+            'products.*.product_id' => 'required|exists:products,id',
+            'products.*.quantity' => 'required|integer|min:1',
+            'products.*.price' => 'required|numeric',
+        ]);
+
+        // Create the order
+        $order = Order::create([
+            'order_no' => $validatedData['order_no'],
+            'customer_id' => $validatedData['customer_id'],
+            'customer_address_id' => $validatedData['customer_address_id'],
+            'payment_mode' => $validatedData['payment_mode'],
+            'payable_amount' => $validatedData['payment_amount'],
+            'payment_status' => $validatedData['payment_status'],
+            'transaction_id' => $validatedData['transaction_id'],
+            'status' => 'placed'
+        ]);
+
+        if ($order) {
+            $existingPrescription = Prescription::where('customer_id', $validatedData['customer_id'])
+                ->where('status', 'pending')
+                ->first();
+            if($validatedData['prescription_id']){
+                $existingPrescription = Prescription::where('id', $validatedData['prescription_id'])->first();
+            }
+
+            if ($existingPrescription) {
+                $existingPrescription->status = 'assigned';
+                $existingPrescription->order_id = $order->id;
+                $existingPrescription->save();
+            }
+        }
+        // Create order items
+        foreach ($validatedData['products'] as $item) {
+            $order->orderItems()->create($item);
+        }
+
+        // Create initial order statuses for each item
+        foreach ($order->orderItems as $orderItem) {
+            $orderItem->statuses()->create([
+                'status' => 'placed',
+                'done_by' => 'admin',
+                'active' => true,
+            ]);
+        }
+
+        return response()->json(['message' => 'Order placed successfully', 'order' => $order], 201);
+    }
+    // by customer request
     public function place(Request $request)
     {
         $cx = new CustomerController();

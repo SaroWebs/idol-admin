@@ -57,7 +57,7 @@ class HomeController extends Controller
     }
     public function new_order()
     {
-        $customers = Customer::get();
+        $customers = Customer::with(['addresses'])->get();
         return Inertia::render('Sections/Order/NewOrder',['customers'=>$customers]);
     }
     public function trips()

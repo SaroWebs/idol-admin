@@ -77,6 +77,7 @@ Route::middleware('auth')->group(function () {
         Route::post('order/{order}/cancel', 'cancelOrder');
         Route::post('order/{order}/approve', 'approveOrder');
         Route::post('order/{order}/process', 'processOrder');
+        Route::post('order/create', 'store');
     });
     Route::controller(ProductController::class)->group(function(){
         Route::get('data/products', 'getProductsData');

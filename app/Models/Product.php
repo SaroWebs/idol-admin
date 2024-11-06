@@ -25,4 +25,9 @@ class Product extends Model
     public function images() {
         return $this->hasMany(ProductImage::class);
     }
+
+    public function tax() {
+        return $this->belongsToOne(tax::class);
+    }
+
 }
