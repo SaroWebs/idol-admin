@@ -6,6 +6,7 @@ use App\Models\Tax;
 use App\Models\User;
 use Inertia\Inertia;
 use App\Models\Category;
+use App\Models\Customer;
 use App\Models\UserRole;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -54,7 +55,11 @@ class HomeController extends Controller
     {
         return Inertia::render('Sections/Orders');
     }
-    
+    public function new_order()
+    {
+        $customers = Customer::get();
+        return Inertia::render('Sections/Order/NewOrder',['customers'=>$customers]);
+    }
     public function trips()
     {
         $drivers = User::whereHas('role', function ($query) {

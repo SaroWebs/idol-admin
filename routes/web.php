@@ -40,6 +40,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/products', 'medicine');
         Route::get('/customers', 'customers');
         Route::get('/orders', 'orders');
+        Route::get('/order/new', 'new_order');
         Route::get('/trips', 'trips');
         Route::get('/settings', 'settings');
         Route::get('/d/account', 'delivery_account');

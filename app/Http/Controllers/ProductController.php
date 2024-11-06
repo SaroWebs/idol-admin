@@ -313,12 +313,11 @@ class ProductController extends Controller
     }
 
     public function search_item(Request $request)
-{
+    {
     $search_text = $request->input('term');
 
     if ($search_text) {
         $products = Product::where(function ($query) use ($search_text) {
-                // Prioritize products where the name starts with the search term
                 $query->where('name', 'like', "{$search_text}%")
                       ->orWhere('name', 'like', "%{$search_text}%");
             })
@@ -329,7 +328,7 @@ class ProductController extends Controller
                     WHEN name LIKE ? THEN 2
                     ELSE 3
                 END, name ASC", ["{$search_text}%", "%{$search_text}%"])
-            ->take(50)
+            ->take(30)
             ->get();
 
         return response()->json($products, 200);

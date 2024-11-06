@@ -170,7 +170,7 @@ class PrescriptionController extends Controller
 
     public function get_unassigned_items()
     {
-        $items = Prescription::where('status', 'unassigned')->get()
+        $items = Prescription::where('status', 'unassigned')->with(['customer.addresses'])->get()
             ->groupBy('group_code');
 
         if ($items) {

@@ -1,9 +1,9 @@
 import BreadcrumbsComponent from '@/Components/BreadcrumbComponent';
 import MasterLayout from '@/Layouts/MasterLayout';
-import { Head } from '@inertiajs/react';
-import { Loader, Text, Badge, ActionIcon, Button, Tabs, Table, Modal, Stack } from '@mantine/core'; // Import Loader and Badge
+import { Head, Link } from '@inertiajs/react';
+import { Loader, Text, Badge, ActionIcon, Button, Tabs, Table, Modal } from '@mantine/core'; // Import Loader and Badge
 import { useDisclosure } from '@mantine/hooks';
-import { EyeIcon, PencilIcon } from 'lucide-react';
+import { EyeIcon } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
 const Orders = (props) => {
@@ -113,7 +113,11 @@ const Orders = (props) => {
 				<div className="mt-8">
 					<div className="flex justify-between items-center">
 						<h1 className="text-3xl font-bold">List of Orders</h1>
-						<span><AddNewOrder reload={getData} /></span>
+						<div>
+							<Link href='/order/new'>
+								Create Order
+							</Link>
+						</div>
 					</div>
 
 					<hr className="my-6" />
@@ -282,71 +286,3 @@ const ViewOrder = ({ order, reload }) => {
 		</>
 	);
 };
-
-const AddNewOrder = ({ reload }) => {
-	const [opened, { open, close }] = useDisclosure(false);
-	const [prescriptions, setPrescriptions] = useState([]);
-
-	const [loading, setLoading] = useState(null);
-
-	const [formInfo, setFormInfo] = useState({
-		// 
-	});
-
-	const getPrescs = () => {
-		axios.get(`/data/prescriptions/unassigned`)
-			.then(res => {
-				console.log(res.data);
-				setPrescriptions(res.data);
-			})
-			.catch(err => {
-				console.log(err.message);
-			})
-	}
-
-	const invokeCustomer = (item) => {
-		console.log(item);
-		// fill formInfo with customers default data
-	}
-
-	useEffect(() => {
-		getPrescs()
-	}, [])
-
-	return (
-		<>
-			<Button onClick={open}>Create Order</Button>
-			<Modal opened={opened} onClose={close} size="70%">
-				<div className="flex flex-col w-full">
-					<div className="content w-full p-4 border rounded-md shadow-sm">
-						<Tabs defaultValue="newOrder">
-							<Tabs.List>
-								<Tabs.Tab value="newOrder">New Order</Tabs.Tab>
-								<Tabs.Tab value="prescs">Pending Prescriptions</Tabs.Tab>
-							</Tabs.List>
-							<Tabs.Panel value="newOrder">
-								<div className="w-full">
-
-								</div>
-							</Tabs.Panel>
-							<Tabs.Panel value="prescs">
-								<div className="grid grid-cols-4 gap-2">
-									{(prescriptions && prescriptions.length > 0) ? prescriptions.map(item => (
-										<div key={item.id} className="">
-											<img src={item.image_url} alt={"Prescription"} className="w-full" />
-											<Button onClick={() => invokeCustomer(item)}>Create Order</Button>
-										</div>
-									)) : (
-										<div className="col-span-4">
-											<span>No Item Found !</span>
-										</div>
-									)}
-								</div>
-							</Tabs.Panel>
-						</Tabs>
-					</div>
-				</div>
-			</Modal>
-		</>
-	);
-}
