@@ -78,6 +78,7 @@ Route::middleware('auth')->group(function () {
         Route::post('order/{order}/cancel', 'cancelOrder');
         Route::post('order/{order}/approve', 'approveOrder');
         Route::post('order/{order}/process', 'processOrder');
+        Route::post('order/{order}/deliver', 'deliverOrder');
         Route::post('order/create', 'store');
     });
 
@@ -100,7 +101,7 @@ Route::middleware('auth')->group(function () {
         Route::post('/trip/assign-order', 'assignOrder');
         Route::get('/orders/processed/get', 'getProcessedOrder');
         
-        Route::post('/data/delivery/trips', 'getDriversTrip');
+        Route::post('/data/delivery/trips/{user}', 'getDriversTrip');
         // Route::post('/data/delivery/trips/{tripItem}/deliver', 'deliverTripItem');
         // Route::post('/data/delivery/trips/{tripItem}/cancel', 'cancelTripItem');
         

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Carbon\Carbon;
 use App\Models\Trip;
+use App\Models\User;
 use App\Models\Order;
 use App\Models\TripItem;
 use Illuminate\Http\Request;
@@ -102,8 +103,13 @@ class TripController extends Controller
         }
     }
 
-    public function getDriversTrip(Request $request)
+    public function getDriversTrip(Request $request, User $user)
     {
-        # code...
+        $trips = Trip::with(['tripItems.order.customer', 'tripItems.order.customerAddress','tripItems.order.OrderItems.product'])
+            ->where('user_id', $user->id)
+            ->where('trip_date', $request->date)
+            ->get();
+
+        return response()->json($trips);
     }
 }

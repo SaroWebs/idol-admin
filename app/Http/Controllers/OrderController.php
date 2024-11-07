@@ -139,6 +139,33 @@ class OrderController extends Controller
         ]);
     }
 
+    public function deliverOrder(Order $order)
+    {
+        foreach ($order->orderItems as $item) {
+            $activeStatus = $item->statuses()->where('active', 1)
+                ->where('status', 'processed')
+                ->first();
+
+            if ($activeStatus) {
+                $item->statuses()->create([
+                    'status' => 'delivered',
+                    'done_by' => 'delivery partner',
+                    'active' => 1
+                ]);
+
+                $activeStatus->update(['active' => 0]);
+            }
+        }
+
+        $order->status = 'delivered';
+        $order->save();
+
+        return response()->json([
+            'message' => 'Order delivered successfully.',
+            'order' => $order->load('orderItems.statuses')
+        ]);
+    }
+
     // by customer request
     public function store(Request $request)
     {
