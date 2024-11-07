@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Tax;
 use App\Models\Category;
 use App\Models\Subcategory;
 use App\Models\ProductImage;
@@ -27,7 +28,7 @@ class Product extends Model
     }
 
     public function tax() {
-        return $this->belongsToOne(tax::class);
+        return $this->belongsTo(Tax::class);
     }
 
 }

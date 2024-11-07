@@ -70,6 +70,7 @@ Route::middleware('auth')->group(function () {
         Route::delete('customers/{customer}', 'destroy');
 
     });
+    
     Route::controller(OrderController::class)->group(function(){
         Route::get('data/orders/all', 'getAllOrders');
         Route::get('data/orders', 'get_orders_data');
@@ -79,6 +80,7 @@ Route::middleware('auth')->group(function () {
         Route::post('order/{order}/process', 'processOrder');
         Route::post('order/create', 'store');
     });
+
     Route::controller(ProductController::class)->group(function(){
         Route::get('data/products', 'getProductsData');
         Route::post('data/product', 'store');
@@ -86,10 +88,12 @@ Route::middleware('auth')->group(function () {
         Route::get('/product/code/{code}/check', 'check_code');
         Route::get('/products/export', 'exportCSV');
     });
+
     Route::controller(ProductImageController::class)->group(function(){
         Route::post('/product/{product}/product-image/new', 'store');
         Route::delete('/product-image/{productImage}', 'destroy');
     });
+
     Route::controller(TripController::class)->group(function(){
         Route::get('/data/trips', 'getData');
         Route::post('/trip/new', 'store');
@@ -107,9 +111,11 @@ Route::middleware('auth')->group(function () {
         Route::post('/core-image/banner/new', 'store');
         Route::delete('/data/core-images/banner/{coreImage}', 'destroy');
     });
+
     Route::controller(PrescriptionController::class)->group(function(){
         Route::get('/data/prescriptions/unassigned', 'get_unassigned_items');
     });
+
 });
 
 require __DIR__.'/auth.php';

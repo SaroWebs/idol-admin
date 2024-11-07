@@ -3,6 +3,8 @@ import React, { useState, useEffect } from 'react';
 import { DatePicker } from '@mantine/dates';
 import { Button, Card, Text } from '@mantine/core';
 import axios from 'axios';
+import '@mantine/dates/styles.css';
+
 
 const OrdersList = (props) => {
   const [trips, setTrips] = useState([]);
@@ -13,15 +15,17 @@ const OrdersList = (props) => {
     // Append selected date to FormData
     if (selectedDate) {
       fd.append('date', selectedDate.toISOString().split('T')[0]);
+      axios.post('/data/delivery/trips', fd)
+        .then(res => {
+          setTrips(res.data);
+        })
+        .catch(err => {
+          console.log(err.message);
+        });
+    }else{
+      console.log("check if the date is present or not");
     }
 
-    axios.post('/data/delivery/trips', fd)
-      .then(res => {
-        setTrips(res.data);
-      })
-      .catch(err => {
-        console.log(err.message);
-      });
   };
 
   useEffect(() => {

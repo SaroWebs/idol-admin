@@ -317,7 +317,7 @@ class ProductController extends Controller
     $search_text = $request->input('term');
 
     if ($search_text) {
-        $products = Product::where(function ($query) use ($search_text) {
+        $products = Product::with(['tax'])->where(function ($query) use ($search_text) {
                 $query->where('name', 'like', "{$search_text}%")
                       ->orWhere('name', 'like', "%{$search_text}%");
             })

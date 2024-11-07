@@ -102,5 +102,8 @@ class TripController extends Controller
         }
     }
 
-
+    public function getDriversTrip(Request $request)
+    {
+        # code...
+    }
 }

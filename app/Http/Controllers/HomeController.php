@@ -7,6 +7,7 @@ use App\Models\User;
 use Inertia\Inertia;
 use App\Models\Category;
 use App\Models\Customer;
+use App\Models\Pincodes;
 use App\Models\UserRole;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -58,7 +59,13 @@ class HomeController extends Controller
     public function new_order()
     {
         $customers = Customer::with(['addresses'])->get();
-        return Inertia::render('Sections/Order/NewOrder',['customers'=>$customers]);
+        $pins = Pincodes::get();
+        return Inertia::render('Sections/Order/NewOrder',[
+            'customers'=>$customers, 
+            'pins'=>$pins,
+            'charge_limit'=>1000,
+            'per_km'=>10
+        ]);
     }
     public function trips()
     {
