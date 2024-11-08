@@ -16,7 +16,6 @@ const OrdersList = (props) => {
   const getTrips = () => {
     const user_id = props.auth?.user?.id;
     let fd = new FormData();
-    // Append selected date to FormData
     if (selectedDate && user_id) {
       const refine = dayjs(selectedDate).add(1, 'day').toDate()
       fd.append('date', refine.toISOString().split('T')[0]);

@@ -114,7 +114,7 @@ const Orders = (props) => {
 					<div className="flex justify-between items-center">
 						<h1 className="text-3xl font-bold">List of Orders</h1>
 						<div>
-							<Link href='/order/new'>
+							<Link href='/order/new' className='bg-orange-700 text-white px-2 py-1 rounded shadow-sm'>
 								Create Order
 							</Link>
 						</div>

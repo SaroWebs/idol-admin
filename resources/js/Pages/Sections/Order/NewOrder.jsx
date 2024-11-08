@@ -8,12 +8,11 @@ import axios from 'axios';
 
 const PAYMENT_MODES = [
     { value: 'cash', label: 'Cash' },
-    { value: 'card', label: 'Card' },
     { value: 'online', label: 'Online' },
 ];
 
 const NewOrder = (props) => {
-    const { customers, pins, charge_limit=2000, per_km=10 } = props;
+    const { customers, pins, charge_limit = 2000, per_km = 10 } = props;
     const [prescriptions, setPrescriptions] = useState([]);
     const [customerAddresses, setCustomerAddresses] = useState([]);
     const [open, setOpen] = useState(false);
@@ -33,21 +32,21 @@ const NewOrder = (props) => {
     });
 
     const totalCost = useMemo(() => {
-        return formInfo.products.reduce((sum, product) => sum + Number( (Number(product.price) + parseInt(product.tax)) * product.quantity ), 0).toFixed(2);
+        return formInfo.products.reduce((sum, product) => sum + Number((Number(product.price) + parseInt(product.tax)) * product.quantity), 0).toFixed(2);
     }, [formInfo.products]);
 
 
-    const deliveryCharge = useMemo(()=>{
-        if(customerAddresses && formInfo.customer_address_id){
-            const delivery_address = customerAddresses.find(ca=> ca.id == formInfo.customer_address_id);
-            const pin = pins.find(p=>p.pin == delivery_address.pin);
-            if(totalCost < Number(charge_limit)){
+    const deliveryCharge = useMemo(() => {
+        if (customerAddresses && formInfo.customer_address_id) {
+            const delivery_address = customerAddresses.find(ca => ca.id == formInfo.customer_address_id);
+            const pin = pins.find(p => p.pin == delivery_address.pin);
+            if (totalCost < Number(charge_limit)) {
                 const deliv_amount = Number(pin.distance) * Number(per_km);
                 return deliv_amount;
             }
         }
-        return 0;    
-    },[formInfo.customer_address_id, totalCost]);
+        return 0;
+    }, [formInfo.customer_address_id, totalCost]);
 
 
     const getPrescs = async () => {
@@ -84,7 +83,7 @@ const NewOrder = (props) => {
 
             const tax = product.tax ? parseFloat(((Number(product.tax.tax_rate) / 100) * product.offer_price).toFixed(2)) : 0;
             const payable_amount = parseFloat((Number(product.offer_price) + tax).toFixed(2));
-    
+
             if (existingProductIndex !== -1) {
                 updatedProducts[existingProductIndex].quantity += 1;
             } else {
@@ -134,7 +133,6 @@ const NewOrder = (props) => {
 
     const handleSelectCustomer = (value) => {
         const customer = customers.find(item => item.id == Number(value));
-        console.log(customer);
         const activeAddress = customer.addresses?.find(addr => addr.active == 1);
         setCustomerAddresses(customer.addresses);
         setFormInfo({ ...formInfo, customer_id: value, customer_address_id: activeAddress?.id })
@@ -154,10 +152,11 @@ const NewOrder = (props) => {
             alert('Please fill in all required fields and add at least one product.');
             return;
         }
-        console.log('Form Data:', {...formInfo, payment_amount: Number(totalCost) + Number(deliveryCharge)});
+        console.log('Form Data:', { ...formInfo, payment_amount: Number(totalCost) + Number(deliveryCharge) });
         axios.post(`/order/create`, formInfo)
             .then(res => {
                 console.log(res.data);
+                window.location.href = '/orders';
             })
             .catch(err => {
                 console.log(err.message);
@@ -197,33 +196,41 @@ const NewOrder = (props) => {
                                             required
                                             className='col-span-12 md:col-span-6'
                                         />
-
-                                        <Select
-                                            label="Customer"
-                                            name="customer_id"
-                                            value={formInfo.customer_id}
-                                            onChange={(value) => handleSelectCustomer(value)}
-                                            data={customers ? customers.map(cstmr => ({ value: String(cstmr.id), label: cstmr.name })) : []}
-                                            required
-                                            className='col-span-12 md:col-span-6'
-                                        />
+                                        {customers.length > 0 ? (
+                                            <Select
+                                                label="Customer"
+                                                name="customer_id"
+                                                value={formInfo.customer_id || null}
+                                                onChange={(value) => handleSelectCustomer(value)}
+                                                data={customers.map(cstmr => ({
+                                                    value: String(cstmr.id),
+                                                    label: cstmr.name || 'no name',
+                                                }))}
+                                                required
+                                                className="col-span-12 md:col-span-6"
+                                            />
+                                        ) : (
+                                            <p>No customers available</p>
+                                        )}
 
                                         <div className='col-span-12'>
-                                            {customerAddresses ?
+                                            {customerAddresses.length > 0 ? (
                                                 <Select
                                                     label="Customer Address"
                                                     name="customer_address_id"
-                                                    value={formInfo.customer_address_id}
+                                                    value={formInfo.customer_address_id || null} // Ensure valid value
                                                     onChange={(value) => setFormInfo({ ...formInfo, customer_address_id: value })}
-                                                    data={customerAddresses ? customerAddresses.map(addr => ({
+                                                    data={customerAddresses.map(addr => ({
                                                         value: String(addr.id),
-                                                        label: String(addr.address_line_1 + ', ' + addr.address_line_2 + ', ' + addr.city + ', ' + addr.pin)
-                                                    })) : []}
+                                                        label: `${addr.address_line_1}, ${addr.address_line_2}, ${addr.city}, ${addr.pin}` || 'no address',
+                                                    }))}
+                                                    required
+                                                    className="col-span-12"
                                                 />
-                                                :
+                                            ) : (
+                                                <p>No delivery addresses available</p>
+                                            )}
 
-                                                <p>No delivery address. Please <Link className='text-blue-900 font-bold underline' href={`/customer/${formInfo.customer_id}/address/new`}>add an address</Link> </p>
-                                            }
                                         </div>
                                         <Select
                                             label="Payment Mode"
@@ -300,7 +307,6 @@ const NewOrder = (props) => {
                                     <div className="mt-4 font-semibold">
                                         <h3>Total Cost: ₹{totalCost}</h3>
                                         <h4>Delivery Charge: ₹{deliveryCharge}</h4>
-                                        
                                     </div>
                                 </ div>
                                 {open && (

@@ -23,22 +23,24 @@ class CustomerLoginController extends Controller
 
         $otp = $this->generateOtp();
         
-        CustomerLogin::updateOrCreate(
-            ['customer_id' => $customer->id],
-            [
-                'otp' => $otp,
-                'otp_expired_at' => now()->addMinutes(720),
-            ]
-        );
-
-        // Send SMS logic here
-        // $this->sendSMS($phone, $otp);
-
-        return response()->json([
-            'message' => 'OTP sent successfully',
-            'isNewUser' => $customer->wasRecentlyCreated,
-            'otp'=>$otp, // for now just send otp for testing
-        ]);
+        if ($this->send_message($phone, $otp)) {
+            CustomerLogin::updateOrCreate(
+                ['customer_id' => $customer->id],
+                [
+                    'otp' => $otp,
+                    'otp_expired_at' => now()->addMinutes(720),
+                ]
+            );
+            return response()->json([
+                'message' => 'OTP sent successfully',
+                'isNewUser' => $customer->wasRecentlyCreated,
+                // 'otp'=>$otp, // for now just send otp for testing
+            ]);
+        }else{
+            return response()->json([
+                'message' => 'OTP could not be sent',
+            ]);
+        }
     }
     
     public function verifyOTP(Request $request)
@@ -100,10 +102,25 @@ class CustomerLoginController extends Controller
         return Crypt::encryptString($dataToEncrypt);
     }
 
-    private function sendSMS($phone, $otp)
+
+    private function send_message($uphone, $otp)
     {
-        // Implement your SMS sending logic here
-        // For now, we'll just log the OTP
-        // \Log::info("OTP for $phone: $otp");
+        $message = 'Hi, '.$otp.' is the OTP for verifying your phone number. - IDOL PHARMA';
+        $message = urlencode($message);
+        
+        $getUrl = 'https://api.100coins.co/v3/getsms?apikey=cF4QgBBX89OHndEDpz3pqx90l2aeKlqc&mtype=0&mask=IDOLON&mobno='.$uphone.'&message='.$message.'&tempid=1707172128544139416&peid=1701170895114755311';
+        $ch = curl_init();
+    
+        curl_setopt($ch, CURLOPT_URL, $getUrl);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        $result = curl_exec($ch);
+        
+        if ($result === false) {
+            return false;
+        } else {
+            curl_close($ch);
+            return $result;
+        }
+    
     }
 }
