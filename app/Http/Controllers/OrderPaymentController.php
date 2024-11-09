@@ -7,62 +7,93 @@ use Illuminate\Support\Facades\Http;
 
 class OrderPaymentController extends Controller
 {
-    public function initiatePayment(Request $request)
-    {
-
+   public function initiatePayment(Request $request)
+        {
+            $request->validate([
+                'amount' => 'required|numeric|min:1',
+                'mobile' => 'required|digits:10',
+                'order_no' => 'required|string',
+            ]);
+            if($request->input('order_no')){
+                $o_id = $request->input('order_no');
+            }else{
+                $o_id = uniqid();
+            }
         $merchantId = env('PHONEPE_MERCHANT_ID');
         $apiKey = env('PHONEPE_API_KEY');
-        $order_id = uniqid();
-        $amount = $request->input('amount') * 100; // Convert to paise
+        $orderId = $o_id;
+        $amount = $request->input('amount') * 100; // Convert amount to paise
         $mobile = $request->input('mobile');
-        $description = 'Payment for Product/Service';
-        $success_url = $request->input('success_url');
-        $failed_url = $request->input('failed_url');
-
+        $callbackUrl = route('payment.callback');
+        $redirectUrl = env('FRONTEND_URL') . '/payment-success?orderNo='.$orderId;
+    
         $paymentData = [
             'merchantId' => $merchantId,
-            'merchantTransactionId' => uniqid('MT'),
+            'merchantTransactionId' => uniqid('MT_'),
             'amount' => $amount,
-            'redirectUrl' => $success_url,
+            'callbackUrl' => $callbackUrl,
+            // 'redirectUrl' => $redirectUrl,
             'redirectMode' => 'POST',
             'mobileNumber' => $mobile,
-            'message' => $description,
             'paymentInstrument' => [
                 'type' => 'PAY_PAGE',
             ],
         ];
-
-
-        $payload = base64_encode(json_encode($paymentData));
-        $string = $payload . "/pg/v1/pay" . $apiKey;
-        $sha256 = hash("sha256", $string);
-        $final_x_header = $sha256 . '###1';
-
+    
+        $payloadMain = base64_encode(json_encode($paymentData));
+        $saltIndex = 1; // Use key index 1
+        $stringToHash = $payloadMain . "/pg/v1/pay" . $apiKey;
+        $sha256 = hash("sha256", $stringToHash);
+        $finalXHeader = $sha256 . '###' . $saltIndex;
+    
+        // Send the request to PhonePe
         $response = Http::withHeaders([
             'Content-Type' => 'application/json',
-            'X-VERIFY' => $final_x_header,
-
-        ])->post("https://api.phonepe.com/apis/hermes/pg/v1/pay", json_encode(['request' => $payload]));
-
-        $res = json_decode($response->getBody());
-
-        if (isset($res->success) && $res->success == '1') {
-            return response()->json($res->data->instrumentResponse->redirectInfo->url);
+            'X-VERIFY' => $finalXHeader,
+        ])->post("https://api.phonepe.com/apis/hermes/pg/v1/pay", [
+            'request' => $payloadMain,
+        ]);
+    
+        $res = json_decode($response->getBody(), true);
+    
+        if ($res['success'] ?? false) {
+            // Redirect user to payment URL
+            $payUrl = $res['data']['instrumentResponse']['redirectInfo']['url'];
+            return response()->json(['paymentUrl' => $payUrl]);
         } else {
-            return response()->json(['error' => 'Payment initiation failed.'], 500);
+            return response()->json(
+                [
+                    'error' => $res['message'] ?? 'Payment initiation failed.',
+                    'payment_data'=> $paymentData
+                ], 500);
         }
     }
+
 
     public function paymentCallback(Request $request)
     {
         $paymentStatus = $request->input('status');
         $transactionId = $request->input('transactionId');
         $orderId = $request->input('orderId');
-
+    
+        // Find the order using the `orderId`
+        $order = Order::where('order_no', $orderId)->first();
+    
         if ($paymentStatus === 'SUCCESS') {
-            return response()->json(['message' => 'Payment successful', 'transactionId' => $transactionId]);
+            if ($order) {
+                $order->payment_status = 'paid';
+                $order->transaction_id = $transactionId;
+                $order->save();
+            }
+            return redirect(env('FRONTEND_URL') . '/payment-success?status=success&orderNo='.$orderId.'&transactionId='.$transactionId);
         } else {
-            return response()->json(['error' => 'Payment failed'], 400);
+            if ($order) {
+                $order->payment_status = 'failed';
+                $order->transaction_id = $transactionId;
+                $order->save();
+            }
+            return redirect(env('FRONTEND_URL') . '/payment-failure?status=failed&orderNo=' . $orderId.'&transactionId='.$transactionId);
         }
     }
+
 }

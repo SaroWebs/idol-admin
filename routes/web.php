@@ -11,6 +11,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\CoreImageController;
+use App\Http\Controllers\OrderPaymentController;
 use App\Http\Controllers\PrescriptionController;
 use App\Http\Controllers\ProductImageController;
 
@@ -30,6 +31,7 @@ Route::controller(HomeController::class)->group(function(){
     Route::get('/', 'index');
     Route::get('/test', 'test');
 });
+
 
 Route::middleware('auth')->group(function () {
     Route::controller(HomeController::class)->group(function(){

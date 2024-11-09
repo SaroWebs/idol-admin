@@ -4,10 +4,12 @@ namespace App\Http\Controllers;
 
 use App\Models\Order;
 use App\Models\OrderItem;
+use App\Models\OrderStatus;
 use App\Models\Prescription;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use App\Http\Controllers\CustomerController;
 
 class OrderController extends Controller
 {
@@ -294,16 +296,16 @@ class OrderController extends Controller
 
         $orders = Order::where('customer_id', $customer->id)
             ->with(['orderItems.product', 'orderItems.statuses'])
+            ->orderBy('id', 'desc')
             ->get();
 
         foreach ($orders as $order) {
             $order->prescription = Prescription::where('order_id', $order->id)->first();
         }
 
-        return response()->json($orders); // Return orders as JSON response
+        return response()->json($orders);
     }
 
-    // customer request
     public function get_order(Request $request, Order $order)
     {
         $cx = new CustomerController();
@@ -311,6 +313,113 @@ class OrderController extends Controller
         if ($order && $order->customer_id == $customer->id) {
             $order->load(['orderItems.product.images', 'orderItems.statuses']);
             $order->prescription = Prescription::where('order_id', $order->id)->first();
+            return response()->json($order);
+        }
+        return response()->json(['message' => 'Order not found !'], 404);
+    }
+
+    public function cancel_order(Request $request, Order $order)
+    {
+        $cx = new CustomerController();
+        $customer = $cx->get_customer($request);
+        if ($order && $order->customer_id == $customer->id) {
+            $items = $order->orderItems;
+            foreach ($items as $item) {
+                OrderStatus::where('order_item_id', $item->id)
+                    ->where('active', 1)
+                    ->update(['active' => 0]);
+
+                OrderStatus::create([
+                    'order_item_id' => $item->id,
+                    'status' => 'cancelled',
+                    'reason' => $request->input('reason') ?? '',
+                    'done_by' => 'customer',
+                    'active' => 1,
+                    'created_at' => now(),
+                ]);
+            }
+            
+            $order->status = 'cancelled';
+            $order->save();
+            return response()->json($order);
+        }
+        return response()->json(['message' => 'Order not found !'], 404);
+    }
+    
+    public function cancel_order_item(Request $request, OrderItem $orderItem)
+    {
+        $messages = [];
+        $cx = new CustomerController();
+        $customer = $cx->get_customer($request);
+        
+        $order = $orderItem->order;
+        if($order){
+            array_push($messages, "Got Order with id: ".$order->id);
+        }
+        $product = $orderItem->product;
+        if($product){
+            array_push($messages, "Got Product with id: ".$product->id);
+        }
+        $tax = $product->tax;
+        if($tax){
+            array_push($messages, "Got tax with rate: ".$tax->tax_rate);
+            $tax_rate = $tax->tax_rate;
+        }else{
+            array_push($messages, "No tax");
+            $tax_rate = 0;
+        }
+
+        if ($product && $order) {
+            $product_price = $product->offer_price;
+            $deductable = $product_price * (1 + ($tax_rate / 100));
+            $payable = $order->payable_amount - $deductable;
+            $order->update(['payable_amount' => max($payable, 0)]);
+            $existingItems = OrderStatus::where('order_item_id', $orderItem->id)->where('active', 1)->get();
+            foreach ($existingItems as $exi) {
+                $exi->active = 0;
+                $exi->save();
+            }
+
+            $status = new OrderStatus();
+            $status->order_item_id = $orderItem->id;
+            $status->status = 'cancelled';
+            $status->reason = $request->input('reason') ?? '';
+            $status->done_by = 'customer';
+            $status->active = 1;
+            $status->created_at = now();
+            $status->save();
+        }
+
+        return response()->json(['message' => 'Item Cancelled !'], 200);
+    }
+    
+    public function return_order(Request $request, Order $order)
+    {
+        $cx = new CustomerController();
+        $customer = $cx->get_customer($request);
+        if ($order && $order->customer_id == $customer->id) {
+            $items = $order->orderItems;
+
+            foreach ($items as $item) {
+                $existing = OrderStatus::where('order_item_id', $item->id)
+                    ->where('active', 1)
+                    ->where('status', '!=', 'cancelled')
+                    ->first();
+                if ($existing) {
+                    $existing->update(['active' => 0]);
+                    OrderStatus::create([
+                        'order_item_id' => $item->id,
+                        'status' => 'returned',
+                        'reason' => $request->input('reason') ?? '',
+                        'done_by' => 'customer',
+                        'active' => 1,
+                        'created_at' => now(),
+                    ]);
+                }
+            }
+
+            $order->status = 'returned';
+            $order->save();
             return response()->json($order);
         }
         return response()->json(['message' => 'Order not found !'], 404);

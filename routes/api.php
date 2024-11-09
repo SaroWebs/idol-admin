@@ -19,8 +19,8 @@ use App\Http\Controllers\OrderPaymentController;
 
 
 
-Route::post('payment', [OrderPaymentController::class, 'initiatePayment']);
-Route::post('payment/callback', [OrderPaymentController::class, 'paymentCallback'])->name('payment.callback');
+Route::post('/payment/initiate', [OrderPaymentController::class, 'initiatePayment']);
+Route::post('/payment/callback', [OrderPaymentController::class, 'paymentCallback'])->name('payment.callback');
 
 
 Route::get('/categories/all', [CategoryController::class, 'get_items']);
@@ -72,7 +72,11 @@ Route::middleware('customer')->group(function () {
 
     Route::post('/order/place', [OrderController::class, 'place']);
     Route::get('/order/{order}', [OrderController::class, 'get_order']);
+    Route::post('/order/{order}/cancel', [OrderController::class, 'cancel_order']);
+    Route::post('/order-item/{orderItem}/cancel', [OrderController::class, 'cancel_order_item']);
+    Route::post('/order/{order}/return', [OrderController::class, 'return_order']);
     Route::get('/orders', [OrderController::class, 'get_orders']);
+    
 
     
 });

@@ -23,24 +23,24 @@ class CustomerLoginController extends Controller
 
         $otp = $this->generateOtp();
         
-        if ($this->send_message($phone, $otp)) {
-            CustomerLogin::updateOrCreate(
-                ['customer_id' => $customer->id],
-                [
-                    'otp' => $otp,
-                    'otp_expired_at' => now()->addMinutes(720),
-                ]
-            );
-            return response()->json([
-                'message' => 'OTP sent successfully',
-                'isNewUser' => $customer->wasRecentlyCreated,
-                // 'otp'=>$otp, // for now just send otp for testing
-            ]);
-        }else{
-            return response()->json([
-                'message' => 'OTP could not be sent',
-            ]);
-        }
+        CustomerLogin::updateOrCreate(
+            ['customer_id' => $customer->id],
+            [
+                'otp' => $otp,
+                'otp_expired_at' => now()->addMinutes(720),
+            ]
+        );
+        return response()->json([
+            'message' => 'OTP sent successfully',
+            'isNewUser' => $customer->wasRecentlyCreated,
+            'otp'=>$otp, // for now just send otp for testing
+        ]);
+        // if ($this->send_message($phone, $otp)) {
+        // }else{
+        //     return response()->json([
+        //         'message' => 'OTP could not be sent',
+        //     ]);
+        // }
     }
     
     public function verifyOTP(Request $request)
