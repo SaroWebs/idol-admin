@@ -151,7 +151,7 @@ class OrderController extends Controller
             if ($activeStatus) {
                 $item->statuses()->create([
                     'status' => 'delivered',
-                    'done_by' => 'delivery partner',
+                    'done_by' => 'delivery',
                     'active' => 1
                 ]);
 
