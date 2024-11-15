@@ -10,7 +10,7 @@ import '@mantine/dates/styles.css';
 const OrdersList = (props) => {
   const [trips, setTrips] = useState([]);
   const [selectedDate, setSelectedDate] = useState(new Date());
-	const [loading, setLoading] = useState(null); // Track which action is loading
+  const [loading, setLoading] = useState(null); // Track which action is loading
 
 
   const getTrips = () => {
@@ -48,17 +48,17 @@ const OrdersList = (props) => {
   };
 
   const handleAction = (id, action) => {
-		setLoading(action);
-		axios.post(`/order/${id}/${action}`)
-			.then(res => {
-				console.log(res.data);
+    setLoading(action);
+    axios.post(`/order/${id}/${action}`)
+      .then(res => {
+        console.log(res.data);
         getTrips();
-			})
-			.catch(err => {
-				console.log(err);
-			})
-			.finally(() => setLoading(null));
-	};
+      })
+      .catch(err => {
+        console.log(err);
+      })
+      .finally(() => setLoading(null));
+  };
 
   const formattedAddress = (address) => {
     const add_str = address.address_line_1 + ', ' + address.address_line_2 + ', ' + address.city + ', ' + address.pin;
@@ -92,29 +92,34 @@ const OrdersList = (props) => {
 
                 <Stack>
                   {trip.trip_items.map(item => (
-                    <div className="" key={item.id}>
-                      <div className="flex justify-between">
+                    <div className="mb-4" key={item.id}>
+                      <div className="p-3 rounded-md shadow-md text-sm">
                         <div className="">
                           <p className="text-xl font-bold">Order No: {item.order.order_no}</p>
                           <div className="font-bold">Amount: {item.receivable_amount}</div>
                           <div className="font-bold">Payment Mode: {item.order.payment_mode}</div>
+                          <div className="font-bold">Payment Status: {item.order.payment_status}</div>
                         </div>
-                        <div className="">
-                          <p><b>Customer:</b> {item.order.customer.name}</p>
-                          <p><b>Phone:</b> {item.order.customer.phone}</p>
-                          <p><b>Shipping Address:</b> {formattedAddress(item.order.customer_address)}</p>
-                        </div>
-                        <div className="actions">
-                          {item.order.status == 'cancelled' && <Button disabled>Cancelled</Button>}
-                          
-                          {item.order.status == 'delivered' && <Button disabled>Delivered</Button>}
-                          
-                          {item.order.status == 'onway' &&
-                          (<>
-                            <Button onClick={()=>handleAction(item.order_id, 'cancel')}>Cancel Order</Button>
-                            <Button onClick={()=>handleAction(item.order_id, 'deliver')}>Deliver</Button>
-                          </>)
-                          }
+                        <hr className="my-2" />
+                        <div className="flex justify-between">
+                          <div className="">
+                            <p><b>Customer:</b> {item.order.customer.name}</p>
+                            <p><b>Phone:</b> {item.order.customer.phone}</p>
+                            <p><b>Shipping Address:</b> {formattedAddress(item.order.customer_address)}</p>
+                          </div>
+
+                          <div className="actions">
+                            {item.order.status == 'cancelled' && <Button disabled>Cancelled</Button>}
+
+                            {item.order.status == 'delivered' && <Button disabled>Delivered</Button>}
+
+                            {item.order.status == 'onway' &&
+                              (<>
+                                <Button onClick={() => handleAction(item.order_id, 'cancel')}>Cancel Order</Button>
+                                <Button onClick={() => handleAction(item.order_id, 'deliver')}>Deliver</Button>
+                              </>)
+                            }
+                          </div>
                         </div>
                       </div>
                     </div>

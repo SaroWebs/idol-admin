@@ -3,8 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Models\Tax;
+use App\Models\Trip;
 use App\Models\User;
 use Inertia\Inertia;
+use App\Models\Order;
+use App\Models\Product;
 use App\Models\Category;
 use App\Models\Customer;
 use App\Models\Pincodes;
@@ -29,7 +32,16 @@ class HomeController extends Controller
 
     public function dashboard()
     {
-        return Inertia::render('Sections/Dashboard');
+        $total_customers = Customer::count();
+        $total_orders = Order::count();
+        $total_medicines = Product::count();
+        $total_trips = Trip::count();
+        return Inertia::render('Sections/Dashboard',[
+            'total_customers'=>$total_customers,
+            'total_orders'=>$total_orders,
+            'total_medicines'=>$total_medicines,
+            'total_trips'=>$total_trips,
+        ]);
     }
     
     public function categories()

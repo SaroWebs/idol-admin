@@ -4,6 +4,8 @@ import BreadcrumbsComponent from '@/Components/BreadcrumbComponent';
 
 export default function Dashboard(props) {
 
+    const {total_customers, total_orders, total_medicines, total_trips}=props;
+
     return (
         <MasterLayout {...props}>
             <Head title="Dashboard" />
@@ -21,19 +23,19 @@ export default function Dashboard(props) {
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
                     <div className="bg-blue-500 text-white p-4 rounded-lg shadow-md">
                         <h3 className="text-lg font-semibold">Total Customers</h3>
-                        <p className="text-3xl mt-2">150</p>
+                        <p className="text-3xl mt-2">{total_customers}</p>
                     </div>
                     <div className="bg-green-500 text-white p-4 rounded-lg shadow-md">
                         <h3 className="text-lg font-semibold">Total Orders</h3>
-                        <p className="text-3xl mt-2">320</p>
+                        <p className="text-3xl mt-2">{total_orders}</p>
                     </div>
                     <div className="bg-orange-500 text-white p-4 rounded-lg shadow-md">
                         <h3 className="text-lg font-semibold">Total Medicine</h3>
-                        <p className="text-3xl mt-2">75</p>
+                        <p className="text-3xl mt-2">{total_medicines}</p>
                     </div>
                     <div className="bg-purple-500 text-white p-4 rounded-lg shadow-md">
                         <h3 className="text-lg font-semibold">Total Trips</h3>
-                        <p className="text-3xl mt-2">45</p>
+                        <p className="text-3xl mt-2">{total_trips}</p>
                     </div>
                 </div>
 

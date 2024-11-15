@@ -3,6 +3,7 @@
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Foundation\Application;
+use Illuminate\Support\Facades\Artisan;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\TripController;
 use App\Http\Controllers\OrderController;
@@ -29,7 +30,11 @@ use App\Http\Controllers\ProductImageController;
 
 Route::controller(HomeController::class)->group(function(){
     Route::get('/', 'index');
-    Route::get('/test', 'test');
+});
+
+Route::get('/link-storage', function () {
+    Artisan::call('storage:link');
+    return "Storage link has been created successfully!";
 });
 
 

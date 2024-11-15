@@ -56,6 +56,7 @@ const Orders = (props) => {
 						<Table.Th>Email</Table.Th>
 						<Table.Th>Phone No</Table.Th>
 						<Table.Th>Payment Mode</Table.Th>
+						<Table.Th>Payment Status</Table.Th>
 						<Table.Th>Status</Table.Th>
 						<Table.Th>Actions</Table.Th>
 					</Table.Tr>
@@ -80,6 +81,11 @@ const Orders = (props) => {
 							<Table.Td>
 								<span className="capitalize">
 									{element.payment_mode}
+								</span>
+							</Table.Td>
+							<Table.Td>
+								<span className="capitalize">
+									{element.payment_status}
 								</span>
 							</Table.Td>
 							<Table.Td>
@@ -213,6 +219,7 @@ const ViewOrder = ({ order, reload }) => {
 							<h2><b>Phone: </b>{order.customer?.phone}</h2>
 							<h2><b>Email: </b>{order.customer?.email}</h2>
 							<h2><b>Status: </b><span className="uppercase text-green-700">{order.status}</span></h2>
+							<h2><b>Payment Status({order.payment_mode}): </b><span className="uppercase text-red-700">{order.payment_status}</span></h2>
 						</div>
 						<div className="address">
 							<p><b>Shipping Address: </b>
@@ -267,7 +274,14 @@ const ViewOrder = ({ order, reload }) => {
 							<Table.Tbody>
 								{order.order_items.map((item, index) => (
 									<Table.Tr key={index}>
-										<Table.Td>{item.product?.name}</Table.Td>
+										<Table.Td>
+											<div>
+												<span>{item.product?.name}</span> <br />
+												{item.product?.prescription ?
+													<small className="text-red-600 text-xs">Prescription Required</small>
+													: null}
+											</div>
+										</Table.Td>
 										<Table.Td>{item.product?.offer_price}</Table.Td>
 										<Table.Td>{item.quantity}</Table.Td>
 										<Table.Td>{item.price}</Table.Td>
