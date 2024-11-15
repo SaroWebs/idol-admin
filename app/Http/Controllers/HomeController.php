@@ -13,6 +13,7 @@ use App\Models\Customer;
 use App\Models\Pincodes;
 use App\Models\UserRole;
 use Illuminate\Http\Request;
+use App\Models\DeliveryCharge;
 use Illuminate\Support\Facades\Hash;
 
 class HomeController extends Controller
@@ -72,11 +73,19 @@ class HomeController extends Controller
     {
         $customers = Customer::with(['addresses'])->get();
         $pins = Pincodes::get();
+        $charge_upto = 0;
+        $per_km = 0;
+        $charge_options = DeliveryCharge::first();
+        if($charge_options){
+            $charge_upto = $charge_options->charrge_upto;
+            $per_km = $charge_options->per_km;
+        }
+
         return Inertia::render('Sections/Order/NewOrder',[
             'customers'=>$customers, 
             'pins'=>$pins,
-            'charge_limit'=>1000,
-            'per_km'=>10
+            'charge_limit'=>$charge_upto,
+            'per_km'=>$per_km
         ]);
     }
     public function trips()

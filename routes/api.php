@@ -26,6 +26,8 @@ Route::post('/payment/callback', [OrderPaymentController::class, 'paymentCallbac
 Route::get('/categories/all', [CategoryController::class, 'get_items']);
 Route::get('/banners/all', [CoreImageController::class, 'get_banners']);
 Route::get('/pin/check', [PincodesController::class, 'pin_check']);
+Route::post('/delivery/charge/get', [PincodesController::class, 'after_charge']);
+
 Route::post('/sendotp', [CustomerLoginController::class, 'sendOTP']);
 Route::post('/verifyotp', [CustomerLoginController::class, 'verifyOTP']);
 
@@ -49,6 +51,7 @@ Route::get('/category/{id}', [CategoryController::class, 'getcategory']);
 
 // search
 Route::get('/search', [ProductController::class, 'search_item']);
+
 
 Route::middleware('customer')->group(function () {
     Route::get('/authenticate', [CustomerController::class, 'authenticate']);
