@@ -11,6 +11,7 @@ use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\CustomerController;
+use App\Http\Controllers\PincodesController;
 use App\Http\Controllers\CoreImageController;
 use App\Http\Controllers\OrderPaymentController;
 use App\Http\Controllers\PrescriptionController;
@@ -100,6 +101,12 @@ Route::middleware('auth')->group(function () {
     Route::controller(ProductImageController::class)->group(function(){
         Route::post('/product/{product}/product-image/new', 'store');
         Route::delete('/product-image/{productImage}', 'destroy');
+    });
+
+    Route::controller(PincodesController::class)->group(function(){
+        Route::get('/data/pincode/list', 'pincode_list');
+        Route::post('/data/pincode/create', 'stote');
+        Route::put('/data/pincode/edit/{pincode}', 'update');
     });
 
     Route::controller(TripController::class)->group(function(){

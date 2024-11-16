@@ -36,7 +36,6 @@ const Settings = (props) => {
                         <Tabs.Panel value="home">
                             <Stack gap={'sm'}>
                                 <Banner/>
-
                             </Stack>
                         </Tabs.Panel>
 
@@ -46,13 +45,7 @@ const Settings = (props) => {
                             </Stack>
                         </Tabs.Panel>
 
-                        <Tabs.Panel value="role-management">
-                            <h2>Role Management Settings</h2>
-                            <RoleManagement/>
-                        </Tabs.Panel>
-
                         <Tabs.Panel value="delivery-locations">
-                            <h2>Delivery Locations Settings</h2>
                             <PincodeList/>
                         </Tabs.Panel>
 

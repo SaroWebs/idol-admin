@@ -22,7 +22,7 @@ class CustomerController extends Controller
 
     public function getCustomers(Request $request){
         $search = $request->search;
-        $per_page = $request->per_page ?: 10;  // Default to 10 if per_page is not provided
+        $per_page = $request->per_page ?: 20;  // Default to 10 if per_page is not provided
         $order_by = $request->order_by ?: 'name'; // Default order by 'name'
         $order = $request->order ?: 'asc'; // Default to ascending order
 
@@ -206,7 +206,6 @@ class CustomerController extends Controller
         return $customer;
     }
     
-
     public function authenticate(Request $request){
         $customer = Customer::find($request->customer_id);
         if($customer) {

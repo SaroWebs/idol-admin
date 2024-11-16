@@ -27,11 +27,20 @@ class ProductController extends Controller
                 $query->where('name', 'like', '%' . $searchTerm . '%')
                     ->orWhere('code', 'like', '%' . $searchTerm . '%');
             });
+        
+            $query->orderByRaw("
+                CASE 
+                    WHEN name LIKE ? THEN 0 
+                    WHEN code LIKE ? THEN 0 
+                    ELSE 1 
+                END, name ASC
+            ", [$searchTerm . '%', $searchTerm . '%']);
+        }else{
+            $query->orderBy($sortBy, $sort);
         }
-
+        
         // Order and paginate the results
-        $products = $query->orderBy($sortBy, $sort)
-            ->paginate($perPage, ['*'], 'page', $page);
+        $products = $query->paginate($perPage, ['*'], 'page', $page);
 
         // Assuming you have a method to get categories by their IDs
         $categories = $this->getCategoriesByIds($products->pluck('category_id')->unique());

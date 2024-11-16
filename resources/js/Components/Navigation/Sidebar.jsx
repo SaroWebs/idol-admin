@@ -8,6 +8,7 @@ const Sidebar = (props) => {
     
     const isAdmin = props.auth.role_code == 0 || props.auth.role_code == 1;
     const isDriver = props.auth.role_code == 4 ;
+    const isProductManager = props.auth.role_code == 2 || props.auth.role_code == 3 ;
 
     return (
         <AppShell.Navbar>
@@ -81,6 +82,31 @@ const Sidebar = (props) => {
                                 className="mb-2 hover:text-orange-600"
                                 onClick={() => router.visit('/d/account')}
                                 active={isActive('/d/account')}
+                            />
+                        </nav>
+                    )}
+                    {isProductManager && (
+                        <nav>
+                            <NavLink
+                                label="Dashboard"
+                                leftSection={<HomeIcon className='w-4' />}
+                                className="mb-2 hover:text-orange-600"
+                                onClick={() => router.visit('/dashboard')}
+                                active={isActive('/dashboard')}
+                            />
+                            <NavLink
+                                label="Categories"
+                                leftSection={<ListIcon className='w-4' />}
+                                className="mb-2 hover:text-orange-600"
+                                onClick={() => router.visit('/categories')}
+                                active={isActive('/categories')}
+                            />
+                            <NavLink
+                                label="Medicine"
+                                leftSection={<PackageIcon className='w-4' />}
+                                className="mb-2 hover:text-orange-600"
+                                onClick={() => router.visit('/medicine')}
+                                active={isActive('/medicine')}
                             />
                         </nav>
                     )}

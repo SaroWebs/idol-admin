@@ -167,6 +167,14 @@ const AddMedicine = ({ reload, categories = [], taxes = [] }) => {
                 onChange={(value) => handleChange('tax_id', value)}
               />
             </Grid.Col>
+            <Grid.Col span={8}>
+              <TextInput
+                  label="Manufacturer"
+                  placeholder=""
+                  value={formInfo.mfg_name}
+                  onChange={(e) => handleChange('mfg_name', e.target.value)}
+                />
+            </Grid.Col>
             <Grid.Col span={12}>
               <Textarea
                 label="Details"

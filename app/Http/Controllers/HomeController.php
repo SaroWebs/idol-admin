@@ -77,7 +77,7 @@ class HomeController extends Controller
         $per_km = 0;
         $charge_options = DeliveryCharge::first();
         if($charge_options){
-            $charge_upto = $charge_options->charrge_upto;
+            $charge_upto = $charge_options->charge_upto;
             $per_km = $charge_options->per_km;
         }
 

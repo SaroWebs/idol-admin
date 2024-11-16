@@ -8,6 +8,54 @@ use App\Models\DeliveryCharge;
 
 class PincodesController extends Controller
 {
+    /**
+     * List all pincodes.
+     */
+    public function pincode_list()
+    {
+        $pincodes = Pincodes::all(); // Retrieve all records
+        return response()->json($pincodes);
+    }
+
+    /**
+     * Update a specific pincode.
+     */
+    public function update(Request $request, Pincodes $pincode)
+    {
+        $validated = $request->validate([
+            'pin' => 'required|string|max:10',
+            'distance' => 'required|numeric|min:0',
+            'description' => 'nullable|string|max:255',
+            'active' => 'required|boolean',
+        ]);
+
+        $pincode->update($validated);
+
+        return response()->json([
+            'message' => 'Pincode updated successfully',
+            'pincode' => $pincode,
+        ]);
+    }
+
+
+    public function store(Request $request)
+    {
+        $validated = $request->validate([
+            'pin' => 'required|string|max:10|unique:pincodes,pin',
+            'distance' => 'required|numeric|min:0',
+            'description' => 'nullable|string|max:255',
+            'active' => 'required|boolean',
+        ]);
+
+        $pincode = Pincode::create($validated);
+
+        return response()->json([
+            'message' => 'Pincode created successfully',
+            'pincode' => $pincode,
+        ], 201); // 201 status code indicates resource creation
+    }
+
+
     public function pin_check(Request $request) {
         $pin = $request->input('pin');
         $exists = Pincodes::where('pin', $pin)->exists();
