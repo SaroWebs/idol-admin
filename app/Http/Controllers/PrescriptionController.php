@@ -226,4 +226,14 @@ class PrescriptionController extends Controller
         }
         return response()->json(['message', 'Not found !'], 404);
     }
+
+    public function precription_by_order(Request $request, Order $order)
+    {
+        $prescs = Prescription::where('order_id', $order->id)->orderBy('page', 'asc')->get();
+
+        if ($prescs) {
+            return response()->json($prescs, 200);
+        }
+        return response()->json(['message', 'Not found !'], 404);
+    }
 }

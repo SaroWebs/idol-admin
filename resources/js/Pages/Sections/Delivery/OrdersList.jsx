@@ -60,6 +60,16 @@ const OrdersList = (props) => {
       .finally(() => setLoading(null));
   };
 
+  const getStatus = async (itemId) => {
+    try {
+      const response = await axios.get(`/order_item/${itemId}/status/get`);
+      return response.data.status;
+    } catch (error) {
+      console.error("Error fetching status", error);
+      return "Unknown";
+    }
+  };
+
   const formattedAddress = (address) => {
     const add_str = address.address_line_1 + ', ' + address.address_line_2 + ', ' + address.city + ', ' + address.pin;
     return add_str;
@@ -91,39 +101,45 @@ const OrdersList = (props) => {
                 <hr className='my-6' />
 
                 <Stack>
-                  {trip.trip_items.map(item => (
-                    <div className="mb-4" key={item.id}>
-                      <div className="p-3 rounded-md shadow-md text-sm">
-                        <div className="">
-                          <p className="text-xl font-bold">Order No: {item.order.order_no}</p>
-                          <div className="font-bold">Amount: {item.receivable_amount}</div>
-                          <div className="font-bold">Payment Mode: {item.order.payment_mode}</div>
-                          <div className="font-bold">Payment Status: {item.order.payment_status}</div>
-                        </div>
-                        <hr className="my-2" />
-                        <div className="flex justify-between">
+                  {trip.trip_items.map(item => {
+                    
+                    return (
+                      <div className="mb-4 rounded-md shadow-md" key={item.id}>
+                        <div className="p-3 text-sm">
                           <div className="">
-                            <p><b>Customer:</b> {item.order.customer.name}</p>
-                            <p><b>Phone:</b> {item.order.customer.phone}</p>
-                            <p><b>Shipping Address:</b> {formattedAddress(item.order.customer_address)}</p>
+                            <p className="text-xl font-bold">Order No: {item.order.order_no}</p>
+                            <div className="font-bold">Amount: {item.receivable_amount}</div>
+                            <div className="font-bold">Payment Mode: {item.order.payment_mode}</div>
+                            <div className="font-bold">Payment Status: {item.order.payment_status}</div>
                           </div>
+                          <hr className="my-2" />
+                          <div className="flex justify-between">
+                            <div className="">
+                              <p><b>Customer:</b> {item.order.customer.name}</p>
+                              <p><b>Phone:</b> {item.order.customer.phone}</p>
+                              <p><b>Shipping Address:</b> {formattedAddress(item.order.customer_address)}</p>
+                            </div>
 
-                          <div className="actions">
-                            {item.order.status == 'cancelled' && <Button disabled>Cancelled</Button>}
+                            <div className="actions flex gap-2">
+                              {item.order.status == 'cancelled' && <Button disabled>Cancelled</Button>}
+                              {item.order.status == 'delivered' && <Button disabled>Delivered</Button>}
+                              {item.order.status == 'returned' && <Button disabled>Returned</Button>}
 
-                            {item.order.status == 'delivered' && <Button disabled>Delivered</Button>}
+                              {(!['delivered', 'returned', 'cancelled'].includes(item.order.status)) && 
+                                (<>
+                                  <Button onClick={() => handleAction(item.order_id, 'cancel')}>Cancel Order</Button>
+                                  <Button onClick={() => handleAction(item.order_id, 'deliver')}>Deliver</Button>
+                                </>)
+                              }
+                            </div>
 
-                            {item.order.status == 'onway' &&
-                              (<>
-                                <Button onClick={() => handleAction(item.order_id, 'cancel')}>Cancel Order</Button>
-                                <Button onClick={() => handleAction(item.order_id, 'deliver')}>Deliver</Button>
-                              </>)
-                            }
                           </div>
+                          {/* show order items */}
+                          <OrderDetails order={item.order} getStatus={getStatus} />
                         </div>
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </Stack>
               </Card>
             ))
@@ -137,3 +153,81 @@ const OrdersList = (props) => {
 };
 
 export default OrdersList;
+
+
+const OrderDetails = ({ order, getStatus }) => {
+  const [details, setDetails] = useState(order);
+
+
+
+  const cancelOrderItem = (itemId) => {
+    const reason = prompt('Please provide a reason to cancel the item:');
+    if (reason && reason.trim() !== '') {
+      axios.post(`order-item/${itemId}/cancel`, { reason })
+        .then(res => {
+          alert('The item has been successfully canceled.');
+        })
+        .catch(err => {
+          alert('Failed to cancel the item. Please try again later.');
+        });
+    } else {
+      alert('Cancellation reason is required.');
+    }
+  };
+
+
+  useEffect(() => {
+    const fetchStatuses = async () => {
+      const updatedOrderItems = await Promise.all(order.order_items.map(async (item) => {
+        const status = await getStatus(item.id); // Fetch status for each item
+        return { ...item, status }; // Add status to each item
+      }));
+
+      setDetails({
+        ...order,
+        order_items: updatedOrderItems, // Update order_items with the new statuses
+      });
+    };
+
+    if (order.order_items) {
+      fetchStatuses(); // Fetch statuses when the order items change
+    }
+  }, [order]);
+
+  return (
+    <>
+      <div className="overflow-x-auto">
+        <table className="min-w-full table-auto border-collapse border border-gray-300">
+          <thead>
+            <tr>
+              <th className="border-b px-4 py-2 text-left">Product</th>
+              <th className="border-b px-4 py-2 text-left">MRP</th>
+              <th className="border-b px-4 py-2 text-left">Offer Price</th>
+              <th className="border-b px-4 py-2 text-left">QTY</th>
+              <th className="border-b px-4 py-2 text-left">Total</th>
+              <th className="border-b px-4 py-2 text-left">Status</th>
+              <th className="border-b px-4 py-2 text-left">Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {details.order_items && details.order_items.map((item, index) => {
+              const status = item.status || "Loading...";
+              const cancellable = status != 'delivered' && status != 'returned' && status != 'cancelled';
+              return (
+                <tr key={index} className="hover:bg-gray-100">
+                  <td className="border-b px-4 py-2">{item.product?.name}</td>
+                  <td className="border-b px-4 py-2">{item.product?.price}</td>
+                  <td className="border-b px-4 py-2">{item.product?.offer_price}</td>
+                  <td className="border-b px-4 py-2">{item.quantity}</td>
+                  <td className="border-b px-4 py-2">{item.price}</td>
+                  <td className="border-b px-4 py-2">{status}</td>
+                  <td className="border-b px-4 py-2">{cancellable ? <button onClick={() => cancelOrderItem(item.id)}>Cancel</button> : null}</td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+    </>
+  );
+};

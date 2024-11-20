@@ -31,6 +31,12 @@ class HomeController extends Controller
         return Inertia::render('TestPage');
     }
 
+    public function invoice($code)
+    {
+        $order = Order::where('order_no', $code)->with(['order_items.statuses', 'order_items.product','customer','customer_address'])->first();
+        return Inertia::render('Sections/Invoice',['order'=>$order]);
+    }
+
     public function dashboard()
     {
         $total_customers = Customer::count();
@@ -69,6 +75,7 @@ class HomeController extends Controller
     {
         return Inertia::render('Sections/Orders');
     }
+
     public function new_order()
     {
         $customers = Customer::with(['addresses'])->get();

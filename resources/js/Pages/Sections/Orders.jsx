@@ -3,7 +3,8 @@ import MasterLayout from '@/Layouts/MasterLayout';
 import { Head, Link } from '@inertiajs/react';
 import { Loader, Text, Badge, ActionIcon, Button, Tabs, Table, Modal } from '@mantine/core'; // Import Loader and Badge
 import { useDisclosure } from '@mantine/hooks';
-import { EyeIcon } from 'lucide-react';
+import axios from 'axios';
+import { EyeIcon, FilesIcon } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
 const Orders = (props) => {
@@ -39,6 +40,7 @@ const Orders = (props) => {
 		getData();
 	}, [activeStep]);
 
+	const reqPresc = (order) => order.order_items.some(item => item.product.prescription === 1);
 
 	// Reusable table component
 	const OrdersTable = ({ data }) => {
@@ -96,6 +98,7 @@ const Orders = (props) => {
 							<Table.Td>
 								<div className="flex gap-2">
 									<ViewOrder order={element} reload={getData} />
+									{reqPresc && <ViewPrescription orderId={element.id} />}
 								</div>
 							</Table.Td>
 						</Table.Tr>
@@ -145,13 +148,11 @@ const Orders = (props) => {
 								</Tabs.Tab>
 							</Tabs.List>
 
-							{/* Loading state */}
 							{loading ? (
 								<div className="flex justify-center items-center my-6">
-									<Loader size="lg" /> {/* Show loader while fetching */}
+									<Loader size="lg" />
 								</div>
 							) : (
-								// Render the correct tab content
 								<>
 									<Tabs.Panel value="new">
 										<OrdersTable data={ordersData?.new?.data} />
@@ -203,8 +204,6 @@ const ViewOrder = ({ order, reload }) => {
 	};
 
 	const processOrder = () => handleAction('process');
-	const assignTrip = () => handleAction('assignTrip');
-	const generateInvoice = () => handleAction('generateInvoice');
 
 	return (
 		<>
@@ -250,15 +249,14 @@ const ViewOrder = ({ order, reload }) => {
 								<Button onClick={cancelOrder} color="red" loading={loading === 'cancel'}>Cancel Order</Button>
 							</>
 						)}
-						{order.status === 'processed' && (
+						{(order.status === 'processed' || order.status === 'onway' || order.status === 'delivered') && (
 							<>
-								<Button onClick={assignTrip} color="purple" loading={loading === 'assignTrip'}>Assign Trip</Button>
-								<Button onClick={generateInvoice} color="orange" loading={loading === 'generateInvoice'}>Generate Invoice</Button>
+							<Link target='_blank' href={`/invoice/${order.order_no}`}>
+								<Button color="orange">Print Invoice</Button>
+							</Link>
 							</>
 						)}
-						{order.status === 'onway' && (
-							<Button color="orange">Invoice</Button>
-						)}
+						
 					</div>
 					<div className="border p-2 my-4">
 						<Table>
@@ -287,7 +285,7 @@ const ViewOrder = ({ order, reload }) => {
 										<Table.Td>{item.price}</Table.Td>
 										<Table.Td>
 											<span className="capitalize">
-												{item.statuses?.find(status => status.active === 1)?.status}
+												{(item.statuses?.find(status => status.active === 1)?.status == 'onway') ? 'Assigned' : item.statuses?.find(status => status.active === 1)?.status}
 											</span>
 										</Table.Td>
 									</Table.Tr>
@@ -300,3 +298,54 @@ const ViewOrder = ({ order, reload }) => {
 		</>
 	);
 };
+
+
+const ViewPrescription = ({ orderId }) => {
+	const [prescriptions, setPrescriptions] = useState([]);
+	const [opened, { open, close }] = useDisclosure(false);
+
+	const loadItems = () => {
+		axios.get(`/data/order/${orderId}/prescriptions`)
+			.then(res => setPrescriptions(res.data))
+			.catch(err => console.log(err.message));
+	}
+	useEffect(() => {
+		loadItems();
+	}, [orderId]);
+
+	if (prescriptions.length < 1) return null;
+
+	return (
+		<>
+			<ActionIcon variant="filled" color="cyan" aria-label="View" onClick={open}>
+				<FilesIcon className="w-4" />
+			</ActionIcon>
+			<Modal opened={opened} onClose={close} fullScreen>
+				<div className="overflow-y-auto">
+					{prescriptions
+						.filter(prx => prx.instructions && prx.instructions.trim() !== '')
+						.length > 0 && (
+							<div className="flex flex-col">
+								<h3 className="text-xl font-bold">Instructions:</h3>
+								{prescriptions
+									.filter(prx => prx.instructions && prx.instructions.trim() !== '')
+									.map((prsc, index) => (
+										<p className="" key={index}>
+											{prsc.instructions}
+										</p>
+									))}
+							</div>
+						)
+					}
+
+					{prescriptions.map(pr => (
+						<div key={pr.id} >
+							<img className="w-full" src={"/storage/" + pr.file_path} alt="" />
+						</div>
+					))}
+				</div>
+			</Modal>
+		</>
+	);
+
+}

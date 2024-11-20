@@ -3,6 +3,7 @@ import MasterLayout from '@/Layouts/MasterLayout'
 import { Head } from '@inertiajs/react'
 import { Stack, Tabs } from '@mantine/core'
 import React from 'react'
+import ChargesList from './Setting/ChargesList'
 import Banner from './Setting/HomePage/Banner'
 import PincodeList from './Setting/PincodeList'
 import RoleManagement from './Setting/RoleManagement'
@@ -28,9 +29,8 @@ const Settings = (props) => {
                         <Tabs.List>
                             <Tabs.Tab value="home">Home Page</Tabs.Tab>
                             <Tabs.Tab value="user-management">User  Management</Tabs.Tab>
-                            <Tabs.Tab value="role-management">Role Management</Tabs.Tab>
                             <Tabs.Tab value="delivery-locations">Delivery Locations</Tabs.Tab>
-                            <Tabs.Tab value="tax-information">Tax Information</Tabs.Tab>
+                            <Tabs.Tab value="tax-information">Charges Information</Tabs.Tab>
                         </Tabs.List>
 
                         <Tabs.Panel value="home">
@@ -50,8 +50,7 @@ const Settings = (props) => {
                         </Tabs.Panel>
 
                         <Tabs.Panel value="tax-information">
-                            <h2>Tax Information Settings</h2>
-                            <TaxList/>
+                            <ChargesList/>
                         </Tabs.Panel>
                     </Tabs>
                 </div>

@@ -230,7 +230,6 @@ const NewOrder = (props) => {
                                             ) : (
                                                 <p>No delivery addresses available</p>
                                             )}
-
                                         </div>
                                         <Select
                                             label="Payment Mode"
@@ -338,6 +337,21 @@ const NewOrder = (props) => {
                                 {!open && selectedPrescription && (
                                     <div className="preview_prescription relative p-4 bg-gray-100 shadow-md rounded-md">
                                         <div className="flex flex-col gap-2 overflow-y-scroll max-h-[70vh]">
+                                            {selectedPrescription
+                                                .filter(prx => prx.instructions && prx.instructions.trim() !== '')
+                                                .length > 0 && (
+                                                    <div className="flex flex-col">
+                                                        <h3 className="text-xl font-bold">Instructions:</h3>
+                                                        {selectedPrescription
+                                                            .filter(prx => prx.instructions && prx.instructions.trim() !== '')
+                                                            .map((prsc, index) => (
+                                                                <p className="" key={index}>
+                                                                    {prsc.instructions}
+                                                                </p>
+                                                            ))}
+                                                    </div>
+                                                )
+                                            }
                                             {selectedPrescription.map((page, index) => (
                                                 <img
                                                     key={index}

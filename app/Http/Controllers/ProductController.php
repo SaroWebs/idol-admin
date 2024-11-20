@@ -210,7 +210,6 @@ class ProductController extends Controller
             'o_details' => 'nullable|string',
             'price' => 'nullable|numeric|min:0',
             'discount' => 'nullable|numeric|min:0|max:100',
-            'offer_price' => 'nullable|numeric|min:0',
             'mfg_name' => 'nullable|string|max:255',
             'total_qty' => 'nullable|integer|min:0',
             'alert_qty' => 'nullable|integer|min:0',
@@ -235,7 +234,7 @@ class ProductController extends Controller
         $product->o_details = $request->o_details;
         $product->price = $request->price ?? 0.00;
         $product->discount = $request->discount ?? 0.00;
-        $product->offer_price = $request->offer_price ?? ($product->price - ($product->price * $product->discount / 100));
+        $product->offer_price = $product->price - ($product->price * $product->discount / 100);
         $product->mfg_name = $request->mfg_name;
         $product->total_qty = $request->total_qty ?? 0;
         $product->alert_qty = $request->alert_qty ?? 5;
@@ -271,7 +270,6 @@ class ProductController extends Controller
             'o_details' => 'nullable|string',
             'price' => 'nullable|numeric|min:0',
             'discount' => 'nullable|numeric|min:0|max:100',
-            'offer_price' => 'nullable|numeric|min:0',
             'mfg_name' => 'nullable|string|max:255',
             'total_qty' => 'nullable|integer|min:0',
             'alert_qty' => 'nullable|integer|min:0',
@@ -294,7 +292,7 @@ class ProductController extends Controller
         $product->o_details = $request->o_details;
         $product->price = $request->price ?? $product->price; // Keep existing if not provided
         $product->discount = $request->discount ?? $product->discount; // Keep existing if not provided
-        $product->offer_price = $request->offer_price ?? ($product->price - ($product->price * $product->discount / 100));
+        $product->offer_price = $product->price - ($product->price * $product->discount / 100);
         $product->mfg_name = $request->mfg_name;
         $product->total_qty = $request->total_qty ?? $product->total_qty; // Keep existing if not provided
         $product->alert_qty = $request->alert_qty ?? $product->alert_qty; // Keep existing if not provided

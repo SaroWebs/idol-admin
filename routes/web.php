@@ -16,6 +16,7 @@ use App\Http\Controllers\CoreImageController;
 use App\Http\Controllers\OrderPaymentController;
 use App\Http\Controllers\PrescriptionController;
 use App\Http\Controllers\ProductImageController;
+use App\Http\Controllers\DeliveryChargeController;
 
 /*
 |--------------------------------------------------------------------------
@@ -48,6 +49,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/products', 'medicine');
         Route::get('/customers', 'customers');
         Route::get('/orders', 'orders');
+        Route::get('/invoice/{code}', 'invoice');
         Route::get('/order/new', 'new_order');
         Route::get('/trips', 'trips');
         Route::get('/settings', 'settings');
@@ -78,11 +80,12 @@ Route::middleware('auth')->group(function () {
         Route::delete('customers/{customer}', 'destroy');
 
     });
-    
     Route::controller(OrderController::class)->group(function(){
         Route::get('data/orders/all', 'getAllOrders');
         Route::get('data/orders', 'get_orders_data');
         Route::get('data/order/{order}', 'getOrderInfo');
+        Route::get('order_item/{orderItem}/status/get', 'item_status');
+        Route::post('order-item/{orderItem}/cancel', 'cancel_order_item_by_delivery');
         Route::post('order/{order}/cancel', 'cancelOrder');
         Route::post('order/{order}/approve', 'approveOrder');
         Route::post('order/{order}/process', 'processOrder');
@@ -129,7 +132,15 @@ Route::middleware('auth')->group(function () {
 
     Route::controller(PrescriptionController::class)->group(function(){
         Route::get('/data/prescriptions/unassigned', 'get_unassigned_items');
+        Route::get('/data/order/{order}/prescriptions', 'precription_by_order');
     });
+
+    Route::controller(DeliveryChargeController::class)->group(function(){
+        Route::get('/data/getdch', 'getCharge');
+        Route::post('/data/dch/update', 'update');
+    });
+
+
 
 });
 

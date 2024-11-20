@@ -71,23 +71,20 @@ class PincodesController extends Controller
         $amount = $request->input('amount');
         $drop_point = Pincodes::where('pin', $pin)->first();
         if(!$drop_point){
-            return response()->json(['amount'=> $amount, 'message'=> 'This pin is unavailable'], 400);
+            return response()->json(['charge'=> 0, 'message'=> 'This pin is unavailable'], 400);
         }
 
         $distance = $drop_point->distance;
         $charge_options = DeliveryCharge::first();
-        $updated_amount = 0;
+        $charge = 0;
         if($charge_options){
             if($amount < $charge_options->charge_upto){
                 $charge = $distance * $charge_options->per_km;
             }else{
                 $charge = 0;
             }
-            $updated_amount = $amount + $charge;
-        }else{
-            $updated_amount = $amount;
         }
         
-        return response()->json(['amount'=> number_format($updated_amount, 2,'.','')], 200);
+        return response()->json(['charge'=> $charge], 200);
     }
 }

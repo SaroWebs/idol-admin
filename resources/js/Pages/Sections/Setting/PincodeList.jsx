@@ -37,7 +37,7 @@ const PincodeList = () => {
   ));
 
   return (
-    <div className="w-full">
+    <div className="w-full my-6">
       <div className="flex justify-between items-center mb-4">
         <h3 className="text-lg font-semibold">Available Delivery Regions</h3>
         <NewRegion reload={getData} />

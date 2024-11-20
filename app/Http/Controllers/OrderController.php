@@ -30,8 +30,7 @@ class OrderController extends Controller
             return response()->json(null);
         }
 
-        $orders = $query->paginate(); // Paginate results
-        // Get counts of specific order statuses
+        $orders = $query->paginate();
         $statusCounts = [
             'new' => Order::whereIn('status', ['pending', 'placed', 'approved'])->count(),
             'processed' => Order::whereIn('status', ['processed', 'onway'])->count(),
@@ -56,16 +55,13 @@ class OrderController extends Controller
             $items = $order->orderItems;
 
             foreach ($items as $item) {
-                // Check if the active status is neither 'cancelled' nor 'returned'
                 $activeStatus = $item->statuses()->where('active', 1)->first();
                 if ($activeStatus && !in_array($activeStatus->status, ['cancelled', 'returned'])) {
-                    // Mark the current active status as inactive
                     $activeStatus->update(['active' => 0]);
 
-                    // Create a new status for the order item with 'cancelled'
                     $item->statuses()->create([
                         'status' => 'cancelled',
-                        'done_by' => 'admin',  // Assuming admin cancels the order
+                        'done_by' => 'admin',
                         'active' => 1,
                         'reason' => 'Order cancelled by admin'
                     ]);
@@ -73,6 +69,7 @@ class OrderController extends Controller
             }
 
             // Update the order status to 'cancelled'
+            $order->payable_amount = 0;
             $order->status = 'cancelled';
             $order->save();
 
@@ -141,6 +138,7 @@ class OrderController extends Controller
         ]);
     }
 
+    
     public function deliverOrder(Order $order)
     {
         foreach ($order->orderItems as $item) {
@@ -166,6 +164,17 @@ class OrderController extends Controller
             'message' => 'Order delivered successfully.',
             'order' => $order->load('orderItems.statuses')
         ]);
+    }
+
+    public function item_status(OrderItem $orderItem)
+    {
+        $activeStatus = $orderItem->statuses()->where('active', 1)
+            ->first();
+
+       if ($activeStatus) {
+        return response()->json(['status'=> $activeStatus->status]);
+       }
+       return response()->json(['status'=> 'unknoun']);
     }
 
     // by customer request
@@ -339,6 +348,7 @@ class OrderController extends Controller
                 ]);
             }
             
+            $order->payable_amount = 0;
             $order->status = 'cancelled';
             $order->save();
             return response()->json($order);
@@ -385,6 +395,50 @@ class OrderController extends Controller
             $status->status = 'cancelled';
             $status->reason = $request->input('reason') ?? '';
             $status->done_by = 'customer';
+            $status->active = 1;
+            $status->created_at = now();
+            $status->save();
+        }
+
+        return response()->json(['message' => 'Item Cancelled !'], 200);
+    }
+    
+    public function cancel_order_item_by_delivery(Request $request, OrderItem $orderItem)
+    {
+        $messages = [];
+        $order = $orderItem->order;
+        if($order){
+            array_push($messages, "Got Order with id: ".$order->id);
+        }
+        $product = $orderItem->product;
+        if($product){
+            array_push($messages, "Got Product with id: ".$product->id);
+        }
+        $tax = $product->tax;
+        if($tax){
+            array_push($messages, "Got tax with rate: ".$tax->tax_rate);
+            $tax_rate = $tax->tax_rate;
+        }else{
+            array_push($messages, "No tax");
+            $tax_rate = 0;
+        }
+
+        if ($product && $order) {
+            $product_price = $product->offer_price;
+            $deductable = $product_price * (1 + ($tax_rate / 100));
+            $payable = $order->payable_amount - $deductable;
+            $order->update(['payable_amount' => max($payable, 0)]);
+            $existingItems = OrderStatus::where('order_item_id', $orderItem->id)->where('active', 1)->get();
+            foreach ($existingItems as $exi) {
+                $exi->active = 0;
+                $exi->save();
+            }
+
+            $status = new OrderStatus();
+            $status->order_item_id = $orderItem->id;
+            $status->status = 'cancelled';
+            $status->reason = $request->input('reason') ?? '';
+            $status->done_by = 'delivery';
             $status->active = 1;
             $status->created_at = now();
             $status->save();

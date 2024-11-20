@@ -68,7 +68,7 @@ const Customers = (props) => {
 				<div className="mt-8">
 					<div className="flex justify-between items-center">
 						<h1 className="text-3xl font-semibold text-gray-800">List of Customers</h1>
-						<Button variant="filled" color="blue">Add Customer</Button>
+						{/* <Button variant="filled" color="blue">Add Customer</Button> */}
 					</div>
 
 					<hr className="my-6" />

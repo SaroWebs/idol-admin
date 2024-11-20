@@ -19,7 +19,6 @@ const EditMedicine = ({ medicine, reload, categories = [], taxes = [] }) => {
     o_details: medicine.o_details,
     price: medicine.price,
     discount: medicine.discount,
-    offer_price: medicine.offer_price,
     mfg_name: medicine.mfg_name,
     total_qty: medicine.total_qty,
     alert_qty: medicine.alert_qty,
@@ -36,13 +35,8 @@ const EditMedicine = ({ medicine, reload, categories = [], taxes = [] }) => {
     setFormInfo((prev) => ({
       ...prev,
       [field]: typeof value === 'number' ? String(value) : value,
-      offer_price: field === 'price' || field === 'discount'
-        ? calculateOfferPrice(Number(prev.price), field === 'discount' ? Number(value) : Number(prev.discount)).toString()
-        : prev.offer_price
     }));
   };
-
-  const calculateOfferPrice = (price, discount) => price - (price * discount) / 100;
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -116,14 +110,7 @@ const EditMedicine = ({ medicine, reload, categories = [], taxes = [] }) => {
                   onChange={(value) => handleChange('discount', value)}
                 />
               </Grid.Col>
-              <Grid.Col span={4}>
-                <TextInput
-                  label="Offer Price"
-                  placeholder="Calculated offer price"
-                  readOnly
-                  value={formInfo.offer_price}
-                />
-              </Grid.Col>
+              
               <Grid.Col span={4}>
                 <Select
                   label="Top Product"
