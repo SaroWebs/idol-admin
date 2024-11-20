@@ -30,7 +30,7 @@ use App\Http\Controllers\DeliveryChargeController;
 */
 
 
-Route::controller(HomeController::class)->group(function(){
+Route::controller(HomeController::class)->group(function () {
     Route::get('/', 'index');
 });
 
@@ -41,7 +41,7 @@ Route::get('/link-storage', function () {
 
 
 Route::middleware('auth')->group(function () {
-    Route::controller(HomeController::class)->group(function(){
+    Route::controller(HomeController::class)->group(function () {
         Route::get('/home', 'dashboard')->name('home');
         Route::get('/dashboard', 'dashboard')->name('dashboard');
         Route::get('/categories', 'categories');
@@ -53,8 +53,11 @@ Route::middleware('auth')->group(function () {
         Route::get('/order/new', 'new_order');
         Route::get('/trips', 'trips');
         Route::get('/settings', 'settings');
-        Route::get('/d/account', 'delivery_account');
-        Route::get('/d/orders', 'delivery_orders');
+        
+        Route::middleware(['role:5'])->group(function () {
+            Route::get('/d/account', 'delivery_account');
+            Route::get('/d/orders', 'delivery_orders');
+        });
 
         Route::get('/data/users', 'getUsers'); // Fetch all users
         Route::post('/data/users', 'storeUser');
@@ -73,14 +76,13 @@ Route::middleware('auth')->group(function () {
         Route::delete('/data/categories/{category}', 'destroy');
     });
 
-    Route::controller(CustomerController::class)->group(function(){
+    Route::controller(CustomerController::class)->group(function () {
         Route::get('data/customers', 'getCustomers');
         Route::post('customers/new', 'store');
         Route::post('customers/{customer}/update', 'update');
         Route::delete('customers/{customer}', 'destroy');
-
     });
-    Route::controller(OrderController::class)->group(function(){
+    Route::controller(OrderController::class)->group(function () {
         Route::get('data/orders/all', 'getAllOrders');
         Route::get('data/orders', 'get_orders_data');
         Route::get('data/order/{order}', 'getOrderInfo');
@@ -93,7 +95,7 @@ Route::middleware('auth')->group(function () {
         Route::post('order/create', 'store');
     });
 
-    Route::controller(ProductController::class)->group(function(){
+    Route::controller(ProductController::class)->group(function () {
         Route::get('data/products', 'getProductsData');
         Route::post('data/product', 'store');
         Route::post('data/product/{product}/update', 'update');
@@ -101,47 +103,47 @@ Route::middleware('auth')->group(function () {
         Route::get('/products/export', 'exportCSV');
     });
 
-    Route::controller(ProductImageController::class)->group(function(){
+    Route::controller(ProductImageController::class)->group(function () {
         Route::post('/product/{product}/product-image/new', 'store');
         Route::delete('/product-image/{productImage}', 'destroy');
     });
 
-    Route::controller(PincodesController::class)->group(function(){
+    Route::controller(PincodesController::class)->group(function () {
         Route::get('/data/pincode/list', 'pincode_list');
         Route::post('/data/pincode/create', 'stote');
         Route::put('/data/pincode/edit/{pincode}', 'update');
     });
 
-    Route::controller(TripController::class)->group(function(){
+    Route::controller(TripController::class)->group(function () {
         Route::get('/data/trips', 'getData');
         Route::post('/trip/new', 'store');
         Route::post('/trip/assign-order', 'assignOrder');
         Route::get('/orders/processed/get', 'getProcessedOrder');
-        
+
         Route::post('/data/delivery/trips/{user}', 'getDriversTrip');
         // Route::post('/data/delivery/trips/{tripItem}/deliver', 'deliverTripItem');
         // Route::post('/data/delivery/trips/{tripItem}/cancel', 'cancelTripItem');
-        
+
     });
 
-    Route::controller(CoreImageController::class)->group(function(){
+    Route::controller(CoreImageController::class)->group(function () {
         Route::get('/data/core-images/banner', 'getBannersData');
         Route::post('/core-image/banner/new', 'store');
         Route::delete('/data/core-images/banner/{coreImage}', 'destroy');
     });
 
-    Route::controller(PrescriptionController::class)->group(function(){
+    Route::controller(PrescriptionController::class)->group(function () {
         Route::get('/data/prescriptions/unassigned', 'get_unassigned_items');
         Route::get('/data/order/{order}/prescriptions', 'precription_by_order');
     });
 
-    Route::controller(DeliveryChargeController::class)->group(function(){
-        Route::get('/data/getdch', 'getCharge');
-        Route::post('/data/dch/update', 'update');
+
+    Route::middleware(['role:5'])->group(function () {
+        Route::controller(DeliveryChargeController::class)->group(function () {
+            Route::get('/data/getdch', 'getCharge');
+            Route::post('/data/dch/update', 'update');
+        });
     });
-
-
-
 });
 
-require __DIR__.'/auth.php';
+require __DIR__ . '/auth.php';

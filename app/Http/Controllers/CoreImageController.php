@@ -13,6 +13,10 @@ class CoreImageController extends Controller
         $banners = CoreImage::where('type','banner')->where('status', 1)->get();
         return response()->json($banners);
     }
+    public function get_splashes() {
+        $banners = CoreImage::where('type','splash')->where('status', 1)->get();
+        return response()->json($banners);
+    }
 
     // system
     public function getBannersData()
