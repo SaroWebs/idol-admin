@@ -1,7 +1,7 @@
 import BreadcrumbsComponent from '@/Components/BreadcrumbComponent';
 import MasterLayout from '@/Layouts/MasterLayout';
 import { Head, Link } from '@inertiajs/react';
-import { Loader, Text, Badge, ActionIcon, Button, Tabs, Table, Modal } from '@mantine/core'; // Import Loader and Badge
+import { Loader, Text, Badge, ActionIcon, Button, Tabs, Table, Modal } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import axios from 'axios';
 import { EyeIcon, FilesIcon } from 'lucide-react';
@@ -21,7 +21,7 @@ const Orders = (props) => {
 		incomplete: 0
 	})
 	const [activeStep, setActiveStep] = useState('new');
-	const [loading, setLoading] = useState(false); // Loading state for data fetching
+	const [loading, setLoading] = useState(false);
 
 	const getData = () => {
 		setLoading(true); // Start loading
@@ -180,7 +180,7 @@ export default Orders;
 
 const ViewOrder = ({ order, reload }) => {
 	const [opened, { open, close }] = useDisclosure(false);
-	const [loading, setLoading] = useState(null); // Track which action is loading
+	const [loading, setLoading] = useState(null);
 
 	const handleAction = (action) => {
 		setLoading(action);
@@ -312,6 +312,12 @@ const ViewPrescription = ({ orderId }) => {
 	useEffect(() => {
 		loadItems();
 	}, [orderId]);
+
+	useEffect(() => {
+		if(opened){
+			console.log(prescriptions);
+		}
+	}, [opened]);
 
 	if (prescriptions.length < 1) return null;
 

@@ -102,7 +102,6 @@ const OrdersList = (props) => {
 
                 <Stack>
                   {trip.trip_items.map(item => {
-                    
                     return (
                       <div className="mb-4 rounded-md shadow-md" key={item.id}>
                         <div className="p-3 text-sm">

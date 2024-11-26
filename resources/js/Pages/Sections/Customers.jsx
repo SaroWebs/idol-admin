@@ -37,7 +37,7 @@ const Customers = (props) => {
 		<Table.Tr key={element.id}>
 			<Table.Td>
 				{element.image_url ? (
-					<img className="max-w-[100px] h-auto object-cover" src={"/storage" + element.image_url} alt={element.name} />
+					<img className="max-w-[100px] h-auto object-cover" src={"/storage/" + element.image_url} alt={element.name} />
 				) : (
 					<img className="max-w-[100px] h-auto object-cover" src={"/assets/images/no-image.png"} alt={element.name} />
 				)}
@@ -67,8 +67,7 @@ const Customers = (props) => {
 				/>
 				<div className="mt-8">
 					<div className="flex justify-between items-center">
-						<h1 className="text-3xl font-semibold text-gray-800">List of Customers</h1>
-						{/* <Button variant="filled" color="blue">Add Customer</Button> */}
+						<h1 className="text-3xl font-semibold text-gray-800">Customers</h1>
 					</div>
 
 					<hr className="my-6" />

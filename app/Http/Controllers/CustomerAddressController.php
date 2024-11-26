@@ -31,9 +31,7 @@ class CustomerAddressController extends Controller
     {
         $customerController = new CustomerController();
         $customer = $customerController->get_customer($request);
-
         $addresses = CustomerAddress::where('customer_id', $customer->id)->get();
-
         return response()->json($addresses, 200);
     }
 

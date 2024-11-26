@@ -48,6 +48,7 @@ class PrescriptionController extends Controller
             'images' => 'required|array',
             'images.*' => 'file|mimes:jpeg,jpg,png|max:2048',
             'status' => 'required|in:pending,assigned,unassigned',
+            'instructions'=> 'nullable'
         ]);
 
         $order_id = null;
@@ -94,6 +95,7 @@ class PrescriptionController extends Controller
                 $prescription = Prescription::create([
                     'customer_id' => $customer->id,
                     'file_path' => $imagePath,
+                    'instructions' => $validatedData['instructions'],
                     'status' => $validatedData['status'],
                     'group_code' => $groupCode,
                     'order_id' => $order_id,

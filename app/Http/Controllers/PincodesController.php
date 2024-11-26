@@ -47,7 +47,7 @@ class PincodesController extends Controller
             'active' => 'required|boolean',
         ]);
 
-        $pincode = Pincode::create($validated);
+        $pincode = Pincodes::create($validated);
 
         return response()->json([
             'message' => 'Pincode created successfully',

@@ -108,7 +108,7 @@ Route::middleware('auth')->group(function () {
 
     Route::controller(PincodesController::class)->group(function(){
         Route::get('/data/pincode/list', 'pincode_list');
-        Route::post('/data/pincode/create', 'stote');
+        Route::post('/data/pincode/create', 'store');
         Route::put('/data/pincode/edit/{pincode}', 'update');
     });
 

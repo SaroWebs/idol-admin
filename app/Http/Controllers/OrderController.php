@@ -3,10 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Models\Order;
+use App\Models\Pincodes;
 use App\Models\OrderItem;
 use App\Models\OrderStatus;
 use App\Models\Prescription;
 use Illuminate\Http\Request;
+use App\Models\DeliveryCharge;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use App\Http\Controllers\CustomerController;
@@ -18,6 +20,7 @@ class OrderController extends Controller
     public function get_orders_data(Request $request)
     {
         $query = Order::with(['orderItems.statuses', 'orderItems.product', 'customer', 'customerAddress']);
+        
         if ($request->status == 'new') {
             $query->whereIn('status', ['pending', 'placed', 'approved']);
         } elseif ($request->status == 'processed') {
@@ -87,6 +90,7 @@ class OrderController extends Controller
 
     public function approveOrder(Order $order)
     {
+        $this->updatePayable($order->id);
         foreach ($order->orderItems as $item) {
             $activeStatus = $item->statuses()->where('active', 1)
                 ->whereNotIn('status', ['cancelled', 'returned'])
@@ -113,6 +117,7 @@ class OrderController extends Controller
 
     public function processOrder(Order $order)
     {
+        $this->updatePayable($order->id);
         foreach ($order->orderItems as $item) {
             $activeStatus = $item->statuses()->where('active', 1)
                 ->where('status', 'approved')
@@ -309,6 +314,7 @@ class OrderController extends Controller
             ->get();
 
         foreach ($orders as $order) {
+            $this->updatePayable($order->id);
             $order->prescription = Prescription::where('order_id', $order->id)->first();
         }
 
@@ -319,7 +325,9 @@ class OrderController extends Controller
     {
         $cx = new CustomerController();
         $customer = $cx->get_customer($request);
+
         if ($order && $order->customer_id == $customer->id) {
+            $this->updatePayable($order->id);
             $order->load(['orderItems.product.images', 'orderItems.statuses']);
             $order->prescription = Prescription::where('order_id', $order->id)->first();
             return response()->json($order);
@@ -331,13 +339,17 @@ class OrderController extends Controller
     {
         $cx = new CustomerController();
         $customer = $cx->get_customer($request);
+
         if ($order && $order->customer_id == $customer->id) {
+
             $items = $order->orderItems;
             foreach ($items as $item) {
+                // Deactivate existing active statuses
                 OrderStatus::where('order_item_id', $item->id)
                     ->where('active', 1)
                     ->update(['active' => 0]);
 
+                // Create a new "cancelled" status
                 OrderStatus::create([
                     'order_item_id' => $item->id,
                     'status' => 'cancelled',
@@ -347,110 +359,127 @@ class OrderController extends Controller
                     'created_at' => now(),
                 ]);
             }
-            
-            $order->payable_amount = 0;
+
+            // Update order status and payable amount
             $order->status = 'cancelled';
             $order->save();
+
+            // Recalculate the payable amount
+            $this->updatePayable($order->id);
+
             return response()->json($order);
         }
-        return response()->json(['message' => 'Order not found !'], 404);
+
+        return response()->json(['message' => 'Order not found!'], 404);
     }
-    
+
     public function cancel_order_item(Request $request, OrderItem $orderItem)
     {
         $messages = [];
         $cx = new CustomerController();
         $customer = $cx->get_customer($request);
-        
+
         $order = $orderItem->order;
-        if($order){
-            array_push($messages, "Got Order with id: ".$order->id);
+        if ($order) {
+            array_push($messages, "Got Order with id: " . $order->id);
         }
+
         $product = $orderItem->product;
-        if($product){
-            array_push($messages, "Got Product with id: ".$product->id);
+        if ($product) {
+            array_push($messages, "Got Product with id: " . $product->id);
         }
+
         $tax = $product->tax;
-        if($tax){
-            array_push($messages, "Got tax with rate: ".$tax->tax_rate);
-            $tax_rate = $tax->tax_rate;
-        }else{
+        if ($tax) {
+            array_push($messages, "Got tax with rate: " . $tax->tax_rate);
+        } else {
             array_push($messages, "No tax");
-            $tax_rate = 0;
         }
 
         if ($product && $order) {
-            $product_price = $product->offer_price;
-            $deductable = $product_price * (1 + ($tax_rate / 100));
-            $payable = $order->payable_amount - $deductable;
-            $order->update(['payable_amount' => max($payable, 0)]);
-            $existingItems = OrderStatus::where('order_item_id', $orderItem->id)->where('active', 1)->get();
+            // Deactivate existing active statuses
+            $existingItems = OrderStatus::where('order_item_id', $orderItem->id)
+                ->where('active', 1)
+                ->get();
+
             foreach ($existingItems as $exi) {
                 $exi->active = 0;
                 $exi->save();
             }
 
-            $status = new OrderStatus();
-            $status->order_item_id = $orderItem->id;
-            $status->status = 'cancelled';
-            $status->reason = $request->input('reason') ?? '';
-            $status->done_by = 'customer';
-            $status->active = 1;
-            $status->created_at = now();
-            $status->save();
+            // Create a new "cancelled" status
+            OrderStatus::create([
+                'order_item_id' => $orderItem->id,
+                'status' => 'cancelled',
+                'reason' => $request->input('reason') ?? '',
+                'done_by' => 'customer',
+                'active' => 1,
+                'created_at' => now(),
+            ]);
+
+            // Recalculate the payable amount
+            $this->updatePayable($order->id);
         }
 
-        return response()->json(['message' => 'Item Cancelled !'], 200);
+        return response()->json(['message' => 'Item Cancelled!'], 200);
     }
+
     
     public function cancel_order_item_by_delivery(Request $request, OrderItem $orderItem)
     {
         $messages = [];
         $order = $orderItem->order;
-        if($order){
-            array_push($messages, "Got Order with id: ".$order->id);
+
+        if ($order) {
+            array_push($messages, "Got Order with id: " . $order->id);
         }
+
         $product = $orderItem->product;
-        if($product){
-            array_push($messages, "Got Product with id: ".$product->id);
+        if ($product) {
+            array_push($messages, "Got Product with id: " . $product->id);
         }
+
         $tax = $product->tax;
-        if($tax){
-            array_push($messages, "Got tax with rate: ".$tax->tax_rate);
-            $tax_rate = $tax->tax_rate;
-        }else{
+        if ($tax) {
+            array_push($messages, "Got tax with rate: " . $tax->tax_rate);
+        } else {
             array_push($messages, "No tax");
-            $tax_rate = 0;
         }
 
         if ($product && $order) {
-            $product_price = $product->offer_price;
-            $deductable = $product_price * (1 + ($tax_rate / 100));
-            $payable = $order->payable_amount - $deductable;
-            $order->update(['payable_amount' => max($payable, 0)]);
-            $existingItems = OrderStatus::where('order_item_id', $orderItem->id)->where('active', 1)->get();
+            // Deactivate existing statuses for this item
+            $existingItems = OrderStatus::where('order_item_id', $orderItem->id)
+                ->where('active', 1)
+                ->get();
+
             foreach ($existingItems as $exi) {
                 $exi->active = 0;
                 $exi->save();
             }
 
-            $status = new OrderStatus();
-            $status->order_item_id = $orderItem->id;
-            $status->status = 'cancelled';
-            $status->reason = $request->input('reason') ?? '';
-            $status->done_by = 'delivery';
-            $status->active = 1;
-            $status->created_at = now();
-            $status->save();
+            // Create a new "cancelled" status
+            OrderStatus::create([
+                'order_item_id' => $orderItem->id,
+                'status' => 'cancelled',
+                'reason' => $request->input('reason') ?? '',
+                'done_by' => 'delivery',
+                'active' => 1,
+                'created_at' => now(),
+            ]);
+
+            // Update the order's payable amount
+            $this->updatePayable($order->id);
         }
 
-        return response()->json(['message' => 'Item Cancelled !'], 200);
+        return response()->json(['message' => 'Item Cancelled!'], 200);
     }
+
     
     public function return_order(Request $request, Order $order)
     {
         $cx = new CustomerController();
         $customer = $cx->get_customer($request);
+
         if ($order && $order->customer_id == $customer->id) {
             $items = $order->orderItems;
 
@@ -459,8 +488,12 @@ class OrderController extends Controller
                     ->where('active', 1)
                     ->where('status', '!=', 'cancelled')
                     ->first();
+
                 if ($existing) {
+                    // Deactivate the current status
                     $existing->update(['active' => 0]);
+
+                    // Create a new "returned" status
                     OrderStatus::create([
                         'order_item_id' => $item->id,
                         'status' => 'returned',
@@ -472,10 +505,77 @@ class OrderController extends Controller
                 }
             }
 
+            // Update the order's status to "returned"
             $order->status = 'returned';
             $order->save();
+
+            // Recalculate the order's payable amount
+            $this->updatePayable($order->id);
+
             return response()->json($order);
         }
-        return response()->json(['message' => 'Order not found !'], 404);
+
+        return response()->json(['message' => 'Order not found!'], 404);
     }
+
+
+    public function updatePayable($order_id)
+    {
+        $order = Order::find($order_id);
+        if (!$order) {
+            return;
+        }
+
+        $totalPayable = 0;
+        $items = $order->orderItems;
+
+        foreach ($items as $item) {
+            // Check if the item is not cancelled or returned
+            $status = OrderStatus::where('order_item_id', $item->id)
+                ->where('active', 1)
+                ->whereIn('status', ['cancelled', 'returned'])
+                ->exists();
+
+            if (!$status) {
+                $product = $item->product;
+                $offerPrice = $product->offer_price;
+                $taxRate = $product->tax->tax_rate ?? 0; // Assuming tax_rate can be null
+
+                // Calculate price with tax for this item
+                $itemPriceWithTax = ($offerPrice * (1 + $taxRate / 100)) * $item->quantity;
+
+                // Update item's price
+                $item->price = $itemPriceWithTax;
+                $item->save();
+
+                // Add to total payable
+                $totalPayable += $itemPriceWithTax;
+            }
+        }
+
+        // Only calculate delivery charge if there are valid items in the order
+        if ($totalPayable > 0) {
+            $charge = 0;
+            $pin = $order->customerAddress->pin;
+            $dropPoint = Pincodes::where('pin', $pin)->first();
+
+            if ($dropPoint) {
+                $distance = $dropPoint->distance;
+                $chargeOptions = DeliveryCharge::first();
+
+                if ($chargeOptions && $totalPayable < $chargeOptions->charge_upto) {
+                    $charge = $distance * $chargeOptions->per_km;
+                }
+            }
+
+            // Add delivery charge to total payable
+            $totalPayable += $charge;
+        }
+
+        // Update order's payable amount
+        $order->payable_amount = $totalPayable;
+        $order->save();
+    }
+
+    
 }
