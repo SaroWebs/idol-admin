@@ -25,6 +25,7 @@ Route::post('/payment/callback', [OrderPaymentController::class, 'paymentCallbac
 
 Route::get('/categories/all', [CategoryController::class, 'get_items']);
 Route::get('/banners/all', [CoreImageController::class, 'get_banners']);
+Route::get('/aplashes/all', [CoreImageController::class, 'get_splashes']);
 Route::get('/pin/check', [PincodesController::class, 'pin_check']);
 Route::post('/delivery/charge/get', [PincodesController::class, 'after_charge']);
 
@@ -79,8 +80,7 @@ Route::middleware('customer')->group(function () {
     Route::post('/order-item/{orderItem}/cancel', [OrderController::class, 'cancel_order_item']);
     Route::post('/order/{order}/return', [OrderController::class, 'return_order']);
     Route::get('/orders', [OrderController::class, 'get_orders']);
-    
-
+  
     
 });
 

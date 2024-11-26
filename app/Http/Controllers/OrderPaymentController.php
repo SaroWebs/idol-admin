@@ -79,7 +79,7 @@ class OrderPaymentController extends Controller
         // Find the order using the `orderId`
         $order = Order::where('order_no', $orderId)->first();
     
-        if ($paymentStatus === 'SUCCESS') {
+        if ($paymentStatus == 'SUCCESS' || $paymentStatus == 'OK') {
             if ($order) {
                 $order->payment_status = 'paid';
                 $order->transaction_id = $transactionId;
