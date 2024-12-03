@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Customer;
 use Illuminate\Http\Request;
 use App\Models\CustomerAddress;
 use App\Http\Controllers\CustomerController;
@@ -40,6 +41,25 @@ class CustomerAddressController extends Controller
         $customerController = new CustomerController();
         $customer = $customerController->get_customer($request);
 
+        $validatedData = $request->validate([
+            'type' => 'nullable|in:home,work,other',
+            'city' => 'nullable|string|max:255',
+            'state' => 'nullable|string|max:255',
+            'address_line_1' => 'nullable|string|max:255',
+            'address_line_2' => 'nullable|string|max:255',
+            'pin' => 'nullable|string|max:20',
+        ]);
+        
+        $address = new CustomerAddress($validatedData);
+        $address->customer_id = $customer->id;
+        $address->active = CustomerAddress::where('customer_id', $customer->id)->count() === 0 ? 1 : 0;
+        $address->save();
+
+        return response()->json(['message' => 'Address created successfully', 'address' => $address], 201);
+    }
+
+    public function store_by_admin(Request $request, Customer $customer)
+    {
         $validatedData = $request->validate([
             'type' => 'nullable|in:home,work,other',
             'city' => 'nullable|string|max:255',

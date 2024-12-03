@@ -27,7 +27,7 @@ class CustomerController extends Controller
         $order = $request->order ?: 'asc'; // Default to ascending order
 
         // Initialize the query
-        $query = Customer::query();
+        $query = Customer::with(['addresses']);
 
         // Apply search filter (assuming 'name', 'email', and 'phone' are searchable)
         if ($search) {

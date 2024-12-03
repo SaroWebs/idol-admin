@@ -17,6 +17,7 @@ use App\Http\Controllers\OrderPaymentController;
 use App\Http\Controllers\PrescriptionController;
 use App\Http\Controllers\ProductImageController;
 use App\Http\Controllers\DeliveryChargeController;
+use App\Http\Controllers\CustomerAddressController;
 
 /*
 |--------------------------------------------------------------------------
@@ -53,14 +54,14 @@ Route::middleware('auth')->group(function () {
         Route::get('/order/new', 'new_order');
         Route::get('/trips', 'trips');
         Route::get('/settings', 'settings');
-        
+        Route::get('/data/users', 'getUsers'); // Fetch all users
+        Route::post('/data/users', 'storeUser');
+    });
+    Route::controller(HomeController::class)->group(function () {
         Route::middleware(['role:5'])->group(function () {
             Route::get('/d/account', 'delivery_account');
             Route::get('/d/orders', 'delivery_orders');
         });
-
-        Route::get('/data/users', 'getUsers'); // Fetch all users
-        Route::post('/data/users', 'storeUser');
     });
 
     Route::controller(ProfileController::class)->group(function () {
@@ -82,6 +83,11 @@ Route::middleware('auth')->group(function () {
         Route::post('customers/{customer}/update', 'update');
         Route::delete('customers/{customer}', 'destroy');
     });
+
+    Route::controller(CustomerAddressController::class)->group(function () {
+        Route::post('customer/{customer}/address/store', 'store_by_admin');
+    });
+    
     Route::controller(OrderController::class)->group(function () {
         Route::get('data/orders/all', 'getAllOrders');
         Route::get('data/orders', 'get_orders_data');
@@ -116,6 +122,7 @@ Route::middleware('auth')->group(function () {
 
     Route::controller(TripController::class)->group(function () {
         Route::get('/data/trips', 'getData');
+        Route::get('/data/trips/all', 'getTripsByDate');
         Route::post('/trip/new', 'store');
         Route::post('/trip/assign-order', 'assignOrder');
         Route::get('/orders/processed/get', 'getProcessedOrder');

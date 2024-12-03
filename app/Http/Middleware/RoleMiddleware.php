@@ -18,7 +18,7 @@ class RoleMiddleware
     {
         $user = Auth::user();
         if(!$user || !$user->role){
-            abort(403,'Access Denied');
+            abort(403,'Access Denied !');
         }
 
         if(in_array($user->role->code, $roles)){

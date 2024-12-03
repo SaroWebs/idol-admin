@@ -6,6 +6,7 @@ import { useDisclosure } from '@mantine/hooks';
 import axios from 'axios';
 import { EyeIcon, FilesIcon } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import AssignTrip from './Trip/AssignTrip';
 
 const Orders = (props) => {
 	const [ordersData, setOrderData] = useState({
@@ -24,7 +25,7 @@ const Orders = (props) => {
 	const [loading, setLoading] = useState(false);
 
 	const getData = () => {
-		setLoading(true); // Start loading
+		setLoading(true);
 		axios.get(`data/orders?status=${activeStep || 'new'}`)
 			.then(res => {
 				setOrderData({
@@ -42,69 +43,63 @@ const Orders = (props) => {
 
 	const reqPresc = (order) => order.order_items.some(item => item.product.prescription === 1);
 
-	// Reusable table component
 	const OrdersTable = ({ data }) => {
 		if (!data || data.length === 0) {
-			return <Text>No orders found for this status.</Text>; // Empty state message
+			return <Text>No orders found for this status.</Text>;
 		}
 
 		return (
-			<Table>
-				<Table.Thead>
-					<Table.Tr>
-						<Table.Th>Order No</Table.Th>
-						<Table.Th>Customer Name</Table.Th>
-						<Table.Th>Customer Address</Table.Th>
-						<Table.Th>Email</Table.Th>
-						<Table.Th>Phone No</Table.Th>
-						<Table.Th>Payment Mode</Table.Th>
-						<Table.Th>Payment Status</Table.Th>
-						<Table.Th>Status</Table.Th>
-						<Table.Th>Actions</Table.Th>
-					</Table.Tr>
-				</Table.Thead>
-				<Table.Tbody>
-					{data.map(element => (
-						<Table.Tr key={element.id}>
-							<Table.Td>{element.order_no}</Table.Td>
-							<Table.Td>{element.customer?.name}</Table.Td>
-							<Table.Td>
-								{[
-									element.customer_address?.address_line_1,
-									element.customer_address?.address_line_2,
-									element.customer_address?.city,
-									element.customer_address?.state,
-									element.customer_address?.pin ? `(${element.customer_address.pin})` : ''
-								].filter(Boolean).join(', ')}
-							</Table.Td>
-
-							<Table.Td>{element.customer?.email}</Table.Td>
-							<Table.Td>{element.customer?.phone}</Table.Td>
-							<Table.Td>
-								<span className="capitalize">
-									{element.payment_mode}
-								</span>
-							</Table.Td>
-							<Table.Td>
-								<span className="capitalize">
-									{element.payment_status}
-								</span>
-							</Table.Td>
-							<Table.Td>
-								<span className="capitalize">
-									{element.status}
-								</span>
-							</Table.Td>
-							<Table.Td>
-								<div className="flex gap-2">
-									<ViewOrder order={element} reload={getData} />
-									{reqPresc && <ViewPrescription orderId={element.id} />}
-								</div>
-							</Table.Td>
-						</Table.Tr>
-					))}
-				</Table.Tbody>
-			</Table>
+			<div className="overflow-x-auto">
+				<table className="min-w-full table-auto border-collapse border border-gray-200">
+					<thead className="bg-gray-100">
+						<tr>
+							<th className="border border-gray-300 px-4 py-2 text-left">Order No</th>
+							<th className="border border-gray-300 px-4 py-2 text-left">Customer Name</th>
+							<th className="border border-gray-300 px-4 py-2 text-left min-w-[240px]">Customer Address</th>
+							<th className="border border-gray-300 px-4 py-2 text-left">Email</th>
+							<th className="border border-gray-300 px-4 py-2 text-left">Phone No</th>
+							<th className="border border-gray-300 px-4 py-2 text-left">Payment Mode</th>
+							<th className="border border-gray-300 px-4 py-2 text-left">Payment Status</th>
+							<th className="border border-gray-300 px-4 py-2 text-left">Status</th>
+							<th className="border border-gray-300 px-4 py-2 text-center">Actions</th>
+						</tr>
+					</thead>
+					<tbody>
+						{data.map((element) => (
+							<tr key={element.id} className="even:bg-gray-50">
+								<td className="border border-gray-300 px-4 py-2">{element.order_no}</td>
+								<td className="border border-gray-300 px-4 py-2">{element.customer?.name}</td>
+								<td className="border border-gray-300 px-4 py-2">
+									{[
+										element.customer_address?.address_line_1,
+										element.customer_address?.address_line_2,
+										element.customer_address?.city,
+										element.customer_address?.state,
+										element.customer_address?.pin
+											? `(${element.customer_address.pin})`
+											: '',
+									]
+										.filter(Boolean)
+										.join(', ')}
+								</td>
+								<td className="border border-gray-300 px-4 py-2">{element.customer?.email}</td>
+								<td className="border border-gray-300 px-4 py-2">{element.customer?.phone}</td>
+								<td className="border border-gray-300 px-4 py-2 capitalize">{element.payment_mode}</td>
+								<td className="border border-gray-300 px-4 py-2 capitalize">{element.payment_status}</td>
+								<td className="border border-gray-300 px-4 py-2 capitalize">
+									{element.status === 'onway' ? 'Assigned' : element.status}
+								</td>
+								<td className="border border-gray-300 px-4 py-2 text-center">
+									<div className="flex justify-center items-center gap-2">
+										<ViewOrder order={element} reload={getData} />
+										{reqPresc && <ViewPrescription orderId={element.id} />}
+									</div>
+								</td>
+							</tr>
+						))}
+					</tbody>
+				</table>
+			</div>
 		);
 	};
 
@@ -217,7 +212,10 @@ const ViewOrder = ({ order, reload }) => {
 							<h2><b>Name: </b>{order.customer?.name}</h2>
 							<h2><b>Phone: </b>{order.customer?.phone}</h2>
 							<h2><b>Email: </b>{order.customer?.email}</h2>
-							<h2><b>Status: </b><span className="uppercase text-green-700">{order.status}</span></h2>
+							<h2>
+								<b>Status: </b>
+								<span className="uppercase text-green-700">{order.status == 'onway' ? 'Assigned' : order.status}</span>
+							</h2>
 							<h2><b>Payment Status({order.payment_mode}): </b><span className="uppercase text-red-700">{order.payment_status}</span></h2>
 						</div>
 						<div className="address">
@@ -233,6 +231,7 @@ const ViewOrder = ({ order, reload }) => {
 						</div>
 						<div className="order">
 							<h3><b>Order Number:</b> {order.order_no}</h3>
+							<h3 className='text-sm'><b>Order Date:</b> {new Date(order.created_at).toLocaleString()}</h3>
 							<h4><b>Total Amount:</b> {order.payable_amount}</h4>
 						</div>
 					</div>
@@ -249,20 +248,27 @@ const ViewOrder = ({ order, reload }) => {
 								<Button onClick={cancelOrder} color="red" loading={loading === 'cancel'}>Cancel Order</Button>
 							</>
 						)}
-						{(order.status === 'processed' || order.status === 'onway' || order.status === 'delivered') && (
+						{order.status === 'processed' && (
 							<>
-							<Link target='_blank' href={`/invoice/${order.order_no}`}>
-								<Button color="orange">Print Invoice</Button>
-							</Link>
+								<AssignTrip order={order} reload={reload} />
+								<Button onClick={cancelOrder} color="red" loading={loading === 'cancel'}>Cancel Order</Button>
 							</>
 						)}
-						
+						{(order.status === 'processed' || order.status === 'onway' || order.status === 'delivered') && (
+							<>
+								<Link target='_blank' href={`/invoice/${order.order_no}`}>
+									<Button color="orange">Print Invoice</Button>
+								</Link>
+							</>
+						)}
+
 					</div>
 					<div className="border p-2 my-4">
 						<Table>
 							<Table.Thead>
 								<Table.Tr>
 									<Table.Th>Product Name</Table.Th>
+									<Table.Th>MRP</Table.Th>
 									<Table.Th>Price</Table.Th>
 									<Table.Th>Quantity</Table.Th>
 									<Table.Th>Total Amount</Table.Th>
@@ -280,6 +286,7 @@ const ViewOrder = ({ order, reload }) => {
 													: null}
 											</div>
 										</Table.Td>
+										<Table.Td>{item.product?.price}</Table.Td>
 										<Table.Td>{item.product?.offer_price}</Table.Td>
 										<Table.Td>{item.quantity}</Table.Td>
 										<Table.Td>{item.price}</Table.Td>
@@ -314,7 +321,7 @@ const ViewPrescription = ({ orderId }) => {
 	}, [orderId]);
 
 	useEffect(() => {
-		if(opened){
+		if (opened) {
 			console.log(prescriptions);
 		}
 	}, [opened]);

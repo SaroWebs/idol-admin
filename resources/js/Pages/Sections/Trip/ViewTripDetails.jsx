@@ -36,8 +36,8 @@ const ViewTripDetails = (props) => {
                         {trip.trip_items && trip.trip_items.length > 0 ? (
                             trip.trip_items.map((item) => (
                                 <div key={item.id} className="p-2 border-b border-gray-300">
-                                    <Text size="md"><strong>Order ID:</strong> {item.order_no}</Text>
-                                    <Text size="md"><strong>Status:</strong> {item.status}</Text>
+                                    <Text size="md"><strong>Order ID:</strong> {item.order.order_no}</Text>
+                                    <Text size="md"><strong>Status:</strong> {item.order.status}</Text>
                                     <Text size="md"><strong>Receivable Amount:</strong> Rs {item.receivable_amount}</Text>
                                 </div>
                             ))

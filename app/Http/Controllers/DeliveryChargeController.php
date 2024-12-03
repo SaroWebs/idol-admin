@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Order;
+use App\Models\Pincodes;
 use Illuminate\Http\Request;
 use App\Models\DeliveryCharge;
 
@@ -35,4 +37,54 @@ class DeliveryChargeController extends Controller
         return response()->json(['message'=>'updated', 'Charge'=> $dc]);
     }
 
+    public function calculateCharge($order_id)
+    {
+        $order = Order::with('customerAddress')->find($order_id);
+
+        if (!$order) {
+            return [
+                'success' => false,
+                'charge' => 0,
+                'message' => 'Order not found'
+            ];
+        }
+        
+        $pin = $order->customerAddress->pin ?? null;
+        if (!$pin) {
+            return [
+                'success' => false,
+                'charge' => 0,
+                'error' => 'Customer address or pin not available'
+            ];
+        }
+
+        $dropPoint = Pincodes::where('pin', $pin)->first();
+        if (!$dropPoint) {
+            return [
+                'success' => false,
+                'charge' => 0,
+                'error' => 'This pin is unavailable'
+            ];
+        }
+
+        $chargeOptions = DeliveryCharge::first();
+        if (!$chargeOptions) {
+            return [
+                'success' => false,
+                'charge' => 0,
+                'error' => 'Delivery charge configuration not found'
+            ];
+        }
+
+        $charge = ($order->payable_amount < $chargeOptions->charge_upto)
+            ? $dropPoint->distance * $chargeOptions->per_km
+            : 0;
+
+        return [
+            'success' => true,
+            'charge' => $charge
+        ];
+    }
+
+    
 }

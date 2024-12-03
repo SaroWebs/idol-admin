@@ -5,6 +5,7 @@ import { Button, Loader, Select, TextInput, NumberInput } from '@mantine/core';
 import { XIcon } from 'lucide-react';
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import axios from 'axios';
+import NewAddress from './NewAddress';
 
 const PAYMENT_MODES = [
     { value: 'cash', label: 'Cash' },
@@ -212,25 +213,30 @@ const NewOrder = (props) => {
                                         ) : (
                                             <p>No customers available</p>
                                         )}
+                                        {formInfo.customer_id && (
+                                            <div className='col-span-12'>
+                                                {customerAddresses.length > 0 ? (
+                                                    <Select
+                                                        label="Customer Address"
+                                                        name="customer_address_id"
+                                                        value={formInfo.customer_address_id || null} // Ensure valid value
+                                                        onChange={(value) => setFormInfo({ ...formInfo, customer_address_id: value })}
+                                                        data={customerAddresses.map(addr => ({
+                                                            value: String(addr.id),
+                                                            label: `${addr.address_line_1}, ${addr.address_line_2}, ${addr.city}, ${addr.pin}` || 'no address',
+                                                        }))}
+                                                        required
+                                                        className="col-span-12"
+                                                    />
+                                                ) : (
+                                                    <div className="flex justify-between items-center">
+                                                        <span>No Address to ship this order. Please add an address to proceed.</span>
+                                                        <NewAddress customer_id={formInfo.customer_id} />
+                                                    </div>
+                                                )}
+                                            </div>
+                                        )}
 
-                                        <div className='col-span-12'>
-                                            {customerAddresses.length > 0 ? (
-                                                <Select
-                                                    label="Customer Address"
-                                                    name="customer_address_id"
-                                                    value={formInfo.customer_address_id || null} // Ensure valid value
-                                                    onChange={(value) => setFormInfo({ ...formInfo, customer_address_id: value })}
-                                                    data={customerAddresses.map(addr => ({
-                                                        value: String(addr.id),
-                                                        label: `${addr.address_line_1}, ${addr.address_line_2}, ${addr.city}, ${addr.pin}` || 'no address',
-                                                    }))}
-                                                    required
-                                                    className="col-span-12"
-                                                />
-                                            ) : (
-                                                <p>No delivery addresses available</p>
-                                            )}
-                                        </div>
                                         <Select
                                             label="Payment Mode"
                                             name="payment_mode"
@@ -432,3 +438,5 @@ const SearchInputComponent = ({ handleProductSelect }) => {
 };
 
 export default NewOrder;
+
+

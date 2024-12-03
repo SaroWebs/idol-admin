@@ -424,7 +424,6 @@ class OrderController extends Controller
         return response()->json(['message' => 'Item Cancelled!'], 200);
     }
 
-    
     public function cancel_order_item_by_delivery(Request $request, OrderItem $orderItem)
     {
         $messages = [];
@@ -521,16 +520,17 @@ class OrderController extends Controller
 
     public function updatePayable($order_id)
     {
-        $order = Order::find($order_id);
+        $order = Order::with('orderItems.product.tax', 'customerAddress')->find($order_id);
+
         if (!$order) {
             return;
         }
 
         $totalPayable = 0;
+        $activeStatuses = [];
         $items = $order->orderItems;
 
         foreach ($items as $item) {
-            // Check if the item is not cancelled or returned
             $status = OrderStatus::where('order_item_id', $item->id)
                 ->where('active', 1)
                 ->whereIn('status', ['cancelled', 'returned'])
@@ -539,43 +539,54 @@ class OrderController extends Controller
             if (!$status) {
                 $product = $item->product;
                 $offerPrice = $product->offer_price;
-                $taxRate = $product->tax->tax_rate ?? 0; // Assuming tax_rate can be null
+                $taxRate = $product->tax->tax_rate ?? 0;
 
-                // Calculate price with tax for this item
                 $itemPriceWithTax = ($offerPrice * (1 + $taxRate / 100)) * $item->quantity;
 
-                // Update item's price
                 $item->price = $itemPriceWithTax;
                 $item->save();
-
-                // Add to total payable
                 $totalPayable += $itemPriceWithTax;
+            }
+
+            // Collect active statuses
+            $activeStatus = OrderStatus::where('order_item_id', $item->id)
+                ->where('active', 1)
+                ->value('status');
+            
+            if ($activeStatus) {
+                $activeStatuses[] = $activeStatus;
             }
         }
 
-        // Only calculate delivery charge if there are valid items in the order
         if ($totalPayable > 0) {
             $charge = 0;
-            $pin = $order->customerAddress->pin;
-            $dropPoint = Pincodes::where('pin', $pin)->first();
+            $pin = $order->customerAddress->pin ?? null;
+            if ($pin) {
+                $dropPoint = Pincodes::where('pin', $pin)->first();
+                if ($dropPoint) {
+                    $distance = $dropPoint->distance;
+                    $chargeOptions = DeliveryCharge::first();
 
-            if ($dropPoint) {
-                $distance = $dropPoint->distance;
-                $chargeOptions = DeliveryCharge::first();
-
-                if ($chargeOptions && $totalPayable < $chargeOptions->charge_upto) {
-                    $charge = $distance * $chargeOptions->per_km;
+                    if ($chargeOptions && $totalPayable < $chargeOptions->charge_upto) {
+                        $charge = $distance * $chargeOptions->per_km;
+                    }
                 }
             }
 
-            // Add delivery charge to total payable
             $totalPayable += $charge;
         }
 
         // Update order's payable amount
         $order->payable_amount = $totalPayable;
+
+        // Check if all active statuses are the same
+        if (!empty($activeStatuses) && count(array_unique($activeStatuses)) === 1) {
+            $order->status = $activeStatuses[0]; // Set to the common status
+        }
+
         $order->save();
     }
+
 
     
 }

@@ -16,6 +16,7 @@ use Illuminate\Http\Request;
 use App\Models\DeliveryCharge;
 use Illuminate\Support\Facades\Hash;
 use App\Http\Controllers\OrderController;
+use App\Http\Controllers\DeliveryChargeController;
 
 class HomeController extends Controller
 {
@@ -35,19 +36,26 @@ class HomeController extends Controller
     public function invoice($code)
     {
         $order = Order::where('order_no', $code)
-            ->with(['orderItems.statuses', 'orderItems.product', 'customer', 'customerAddress'])
             ->first();
+    
         if (!$order) {
             return redirect()->back()->with('error', 'Order not found!');
         }
-        
         $orderController = new OrderController();
         $orderController->updatePayable($order->id);
+        $order->load(['orderItems.statuses', 'orderItems.product.tax', 'customer', 'customerAddress']);
+    
+        $dcc =new DeliveryChargeController();
+        $chargeDetails = $dcc->calculateCharge($order->id);
 
-        $order->refresh();
+        if ($chargeDetails['success']) {
+            $dc = $chargeDetails['charge'];
+        } else {
+            $dc = 0;
+        }
+        $order->delivery_charge = $dc;
         return Inertia::render('Sections/Invoice', ['order' => $order]);
     }
-
 
     public function dashboard()
     {

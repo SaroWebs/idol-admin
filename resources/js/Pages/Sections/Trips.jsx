@@ -2,12 +2,9 @@ import React, { useEffect, useState } from 'react';
 import BreadcrumbsComponent from '@/Components/BreadcrumbComponent';
 import MasterLayout from '@/Layouts/MasterLayout';
 import { Head } from '@inertiajs/react';
-import { Button, Table, ActionIcon, Pagination, Group, TextInput, Modal } from '@mantine/core';
-import { EyeIcon } from 'lucide-react';
-import { useDisclosure } from '@mantine/hooks';
+import { Button, Table, Pagination, Group, TextInput } from '@mantine/core';
 import axios from 'axios';
 import AddTrip from './Trip/AddTrip';
-import AssignOrder from './Trip/AssignOrder';
 import ViewTripDetails from './Trip/ViewTripDetails';
 
 const Trips = (props) => {
@@ -47,8 +44,8 @@ const Trips = (props) => {
 	};
 
 	const handleSearch = () => {
-		setCurrentPage(1); // Reset to first page on search
-		getData(1); // Trigger search
+		setCurrentPage(1);
+		getData(1);
 	};
 
 	const rows = tripsData?.data.map((element) => (

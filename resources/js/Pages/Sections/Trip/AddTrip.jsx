@@ -2,41 +2,60 @@ import { Button, Modal, Select, TextInput, Text } from '@mantine/core';
 import { DatePickerInput } from '@mantine/dates';
 import { useDisclosure } from '@mantine/hooks';
 import React, { useState } from 'react';
-import axios from 'axios'; // Make sure to import axios
+import dayjs from 'dayjs';
+import utc from 'dayjs/plugin/utc';
+import timezone from 'dayjs/plugin/timezone';
+import axios from 'axios';
 import '@mantine/dates/styles.css';
+
+// Extend dayjs with timezone plugins
+dayjs.extend(utc);
+dayjs.extend(timezone);
 
 const AddTrip = (props) => {
     const { drivers } = props;
+    const [opened, { open, close }] = useDisclosure(false);
 
     const [formData, setFormData] = useState({
         tripDate: null,
         selectedDriver: '',
         instructions: '',
     });
-    const [opened, { open, close }] = useDisclosure(false);
 
     const handleChange = (field) => (value) => {
-        setFormData((prev) => ({ ...prev, [field]: value }));
+        setFormData((prev) => ({
+            ...prev,
+            [field]: value,
+        }));
     };
 
     const handleSubmit = () => {
-        axios.post('/trip/new', {
-            trip_date: formData.tripDate,
+        const tripDate = formData.tripDate
+            ? dayjs(formData.tripDate)
+                  .tz('Asia/Kolkata') // Normalize to IST
+                  .format('YYYY-MM-DD') // Format as 'YYYY-MM-DD'
+            : null;
+
+        const payload = {
+            trip_date: tripDate,
             user_id: formData.selectedDriver,
-            instructions: formData.instructions
-        })
-            .then(res => {
-                console.log(res.data);
+            instructions: formData.instructions,
+        };
+
+        axios
+            .post('/trip/new', payload)
+            .then((res) => {
+                console.log('Trip added successfully:', res.data);
                 close();
-            }).catch(error => {
+            })
+            .catch((error) => {
                 console.error('Error adding trip:', error.message);
             });
     };
 
-    // Format drivers for Select component
-    const driverOptions = drivers.map(driver => ({
+    const driverOptions = drivers.map((driver) => ({
         value: String(driver.id),
-        label: driver.name
+        label: driver.name,
     }));
 
     return (
@@ -54,24 +73,29 @@ const AddTrip = (props) => {
                     label="Trip Date"
                     placeholder="Select trip date"
                     value={formData.tripDate}
-                    onChange={handleChange('tripDate')}
+                    onChange={(date) => handleChange('tripDate')(date)}
                     required
-                    minDate={new Date()} // Ensures the date is today or in the future
+                    minDate={new Date()}
                 />
+
                 <Select
                     label="Select Driver"
                     placeholder="Choose a driver"
                     value={formData.selectedDriver}
                     onChange={handleChange('selectedDriver')}
-                    data={driverOptions} // Use the formatted driver options
+                    data={driverOptions}
                     required
                 />
+
                 <TextInput
                     label="Instructions (optional)"
                     placeholder="Enter any special instructions"
                     value={formData.instructions}
-                    onChange={(event) => handleChange('instructions')(event.currentTarget.value)}
+                    onChange={(event) =>
+                        handleChange('instructions')(event.currentTarget.value)
+                    }
                 />
+
                 <Button onClick={handleSubmit} mt="md">
                     Submit
                 </Button>

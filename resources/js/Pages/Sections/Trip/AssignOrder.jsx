@@ -9,7 +9,6 @@ const AssignOrder = ({ trip }) => {
     const [loading, setLoading] = useState(false);
     const [opened, { open, close }] = useDisclosure(false);
 
-    // Fetch processed orders
     const getOrders = async () => {
         try {
             const res = await axios.get('/orders/processed/get');
@@ -23,7 +22,6 @@ const AssignOrder = ({ trip }) => {
         getOrders();
     }, []);
 
-    // Handle order assignment
     const addItem = async (order) => {
         const fd = new FormData();
         fd.append('trip_id', trip.id);
@@ -34,7 +32,7 @@ const AssignOrder = ({ trip }) => {
         try {
             const res = await axios.post('/trip/assign-order', fd);
             console.log("Order assigned successfully:", res.data);
-            close(); // Close modal after successful assignment
+            close();
         } catch (err) {
             console.error("Error assigning order:", err.message);
         }
@@ -46,12 +44,16 @@ const AssignOrder = ({ trip }) => {
             <Modal opened={opened} onClose={close} title="Assign Orders">
                 <Text>Select orders to assign:</Text>
                 <Stack spacing="md" style={{ marginTop: '20px' }}>
-                    {orders.map(order => (
+                    {(orders && orders.length > 0) ? orders.map(order => (
                         <Group key={order.id} position="apart">
                             <Text>Order #{order.order_no}</Text>
                             <Button onClick={() => addItem(order)}>Assign</Button>
                         </Group>
-                    ))}
+                    )):(
+                        <Group position="apart">
+                            <Text>No processed order to deliver !</Text>
+                        </Group>
+                    )}
                 </Stack>
             </Modal>
         </>

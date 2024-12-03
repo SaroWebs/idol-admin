@@ -11,8 +11,6 @@ use Illuminate\Http\Request;
 
 class TripController extends Controller
 {
-    //getData
-
     public function getData(Request $request)
     {
         $request->validate([
@@ -25,7 +23,7 @@ class TripController extends Controller
         $perPage = $request->input('per_page', 10);
         $searchTerm = $request->input('search', '');
 
-        $query = Trip::with(['user', 'tripItems']);
+        $query = Trip::with(['user', 'tripItems.order']);
 
         if ($searchTerm) {
             $query->where(function ($q) use ($searchTerm) {
@@ -41,12 +39,33 @@ class TripController extends Controller
         return response()->json($trips);
     }
 
+    public function getTripsByDate(Request $request)
+    {
+        $date = $request->query('date');
+        $query = Trip::with(['user', 'tripItems']);
+
+        if ($date) {
+            try {
+                $parsedDate = Carbon::parse($date)->format('Y-m-d');
+                $query->whereDate('trip_date', $parsedDate);
+            } catch (\Exception $e) {
+                return response()->json(['error' => 'Invalid date format'], 400);
+            }
+        }else{
+            $startDate = Carbon::now()->subDays(1)->format('Y-m-d');
+            $query->whereDate('trip_date', '>=', $startDate);
+        }
+
+        $trips = $query->get();
+        return response()->json($trips);
+    }
+
     public function store(Request $request)
     {
         $validatedData = $request->validate([
-            'trip_date' => 'required', // Ensure the date is today or in the future
-            'user_id' => 'required|exists:users,id', // Ensure the driver exists in the users table
-            'instructions' => 'nullable|string|max:255', // Optional instructions
+            'trip_date' => 'required',
+            'user_id' => 'required|exists:users,id',
+            'instructions' => 'nullable|string|max:255',
         ]);
         $tripDate = Carbon::parse($validatedData['trip_date']);
         $trip = Trip::create([
@@ -58,7 +77,7 @@ class TripController extends Controller
         return response()->json([
             'message' => 'Trip created successfully',
             'trip' => $trip,
-        ], 201); // 201 Created
+        ], 201);
     }
 
     public function getProcessedOrder()

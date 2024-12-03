@@ -1,7 +1,8 @@
 import BreadcrumbsComponent from '@/Components/BreadcrumbComponent'
 import MasterLayout from '@/Layouts/MasterLayout'
 import { Head } from '@inertiajs/react'
-import { Button, Table, TextInput, Select, Pagination } from '@mantine/core'
+import { Button, Table, TextInput, Select, Pagination, Modal } from '@mantine/core'
+import { useDisclosure } from '@mantine/hooks'
 import React, { useState, useEffect } from 'react'
 
 const Customers = (props) => {
@@ -18,7 +19,6 @@ const Customers = (props) => {
 
 	const getData = () => {
 		setIsLoading(true);
-		// with pageProps
 		axios.get('data/customers', { params: pageProps })
 			.then(res => {
 				setCustomerData(res.data);
@@ -47,7 +47,7 @@ const Customers = (props) => {
 			<Table.Td>{element.phone}</Table.Td>
 			<Table.Td>
 				<div className="flex gap-2">
-					<Button variant="outline" color="blue">View</Button>
+					<CustomerDetails customer={element} />
 				</div>
 			</Table.Td>
 		</Table.Tr>
@@ -83,7 +83,7 @@ const Customers = (props) => {
 							<TextInput
 								placeholder="Search Customers"
 								value={pageProps.search}
-								onChange={(e) => setPageProps({ ...pageProps, search: e.target.value, page:1 })}
+								onChange={(e) => setPageProps({ ...pageProps, search: e.target.value, page: 1 })}
 								className="max-w-sm"
 							/>
 						</div>
@@ -126,3 +126,44 @@ const Customers = (props) => {
 }
 
 export default Customers
+
+const CustomerDetails = ({ customer }) => {
+	const [opened, { open, close }] = useDisclosure(false);
+	console.log(customer);
+	return (
+		<>
+			<Button onClick={open} variant="outline" color="blue">View</Button>
+			<Modal opened={opened} size={'xl'} onClose={close}>
+				<div className="flex flex-col gap-2">
+					<div className="details p-4">
+						<h3 className="text-2xl font-semibold">{customer.name}</h3>
+						<h4 className="text-gray-700 italic font-semibold">{customer.email}</h4>
+						<h4 className="text-gray-800 font-bold">{customer.phone}</h4>
+					</div>
+					<div className="addresses">
+						<h3 className="text-xl font-semibold">Addresses</h3>
+						{(customer.addresses && customer.addresses.length > 0) ? (
+							<div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+								{customer.addresses.map(address => (
+									<div key={address.id} className="border shadow-md p-4 mb-2">
+										<span className="px-2 py-1 rounded shadow bg-gray-700 text-white uppercase">{address.type}</span>
+										<hr className="my-2" />
+										<p>Address Line 1 : {address.address_line_1}</p>
+										<p>Address Line 2 : {address.address_line_2}</p>
+										<p>City : {address.city}</p>
+										<p>State : {address.state}</p>
+										<p>Pin Number : {address.pin}</p>
+									</div>
+								))}
+							</div>
+						) : (
+							<div className="flex justify-center items-center min-h-16">
+								<span>No Address !</span>
+							</div>
+						)}
+					</div>
+				</div>
+			</Modal>
+		</>
+	);
+}
